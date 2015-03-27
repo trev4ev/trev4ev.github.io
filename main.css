@@ -1,0 +1,21 @@
+@font-face{
+    font-family: custom;
+    src: url(ModernSerifEroded.tff);
+}
+
+h4 {
+    float:right;
+    color: darkcyan;
+    padding-right: 20px;
+    margin-top: 12px; 
+    font-family: custom;
+}
+            
+h4:hover{
+    color: red;
+}
+
+#header {
+    border: 2px solid black;
+    height: 40px;
+}
