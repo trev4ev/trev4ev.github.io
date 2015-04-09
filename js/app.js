@@ -1,5 +1,5 @@
 var pattern = Trianglify({
-                height: window.innerHeight * 2,
+                height: window.innerHeight * 3,
                 width: window.innerWidth,
                 cell_size: 100,
                 x_colors: 'Purples'
