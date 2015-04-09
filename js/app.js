@@ -1,12 +1,11 @@
-var pattern = Trianglify({
+$(document).ready(function(){
+    var pattern = Trianglify({
                 height: window.innerHeight * 3,
                 width: window.innerWidth,
                 cell_size: 100,
                 x_colors: 'Purples'
             });
             document.body.appendChild(pattern.canvas());
-
-$(document).ready(function(){
     $('#spacer').css("margin-top", window.innerHeight);
     $('h1').hide();
     $('.button').hide();
