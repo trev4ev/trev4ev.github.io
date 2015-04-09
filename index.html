@@ -6,8 +6,18 @@
     </head>
     <body>
         <div id = "intro">
-            <h1>T</h1>
-            <a href="" class = "button">Learn More</a>
+            <center><h1>T</h1></center>
+            <center><a href="" class = "button">Learn More</a></center>
         </div>
+        <script src="js/trianglify.min.js"></script>
+        <script>
+            var pattern = Trianglify({
+                height: window.innerHeight,
+                width: window.innerWidth,
+                cell_size: 100,
+                x_colors: 'Purples'
+            });
+            document.body.appendChild(pattern.canvas());
+        </script>
     </body>
 </html>

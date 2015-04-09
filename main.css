@@ -12,9 +12,10 @@
 }
 
 #intro{
-    background-color: #230081;
+    left: 0;
+    right:0;
+    position:absolute;
     color: white;
-    height: 100%;
 }
 
 body{
@@ -25,30 +26,22 @@ h1{
     margin: 0;
     margin-top: -40px;
     font-size: 500px;
-    text-align: center;
-}
-
-h4{
-    text-align: center;
 }
 
 .button{
     font-family: 'walkway_boldregular';
-    margin: auto;
     margin-top: -40px;
     margin-bottom: 70px;
     display: block;
-    text-align: center;
     width: 90px;
     text-decoration: none;
-    color: #230081;
     padding: 20px;
     border: 2px solid white;
-    background-color: white;
     border-radius: 15px;
+    color:white;
 }
 
 .button:hover{
-    color: white;
-    background-color: #230081;
+    background-color: white;
+    color: #825dff
 }
