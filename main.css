@@ -58,7 +58,6 @@ h1{
 .button{
     font-family: 'walkway_boldregular';
     margin-top: -40px;
-    margin-bottom: 70px;
     display: block;
     width: 90px;
     text-decoration: none;
@@ -70,5 +69,12 @@ h1{
 
 .button:hover{
     background-color: white;
-    color: #825dff
+    color: #806bc9;
+}
+
+#spacer{
+    position:absolute;
+    width: 100%;
+    margin-top: 60px;
+    background-color: white;
 }
