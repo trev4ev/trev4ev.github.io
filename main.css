@@ -56,15 +56,17 @@ h1{
 }
 
 .button{
+    left: 0;
+    right:0;
     font-family: 'walkway_boldregular';
-    margin-top: -40px;
-    display: block;
-    width: 90px;
+    width: 120px;
     text-decoration: none;
     padding: 20px;
     border: 2px solid white;
     border-radius: 15px;
     color:white;
+    font-size: 20px;
+    background-color: rgba(0, 0, 0, 0);
 }
 
 #spacer{
