@@ -1,11 +1,13 @@
 $(document).ready(function(){
-    var pattern = Trianglify({
-                height: window.innerHeight * 3,
-                width: window.innerWidth,
-                cell_size: 100,
-                x_colors: 'Purples'
-            });
-            document.body.appendChild(pattern.canvas());
+    var t = new Trianglify();
+var pattern = t.generate(document.body.clientWidth, document.body.clientHeight);
+document.body.setAttribute('style', 'background-image: '+pattern.dataUrl);
+    pattern.svg // SVG DOM Node object
+    pattern.svgString // String representation of the svg element
+    pattern.base64 // Base64 representation of the svg element
+    pattern.dataUri // data-uri string
+    pattern.dataUrl // data-uri string wrapped in url() for use in css
+    pattern.append() // append pattern to <body>. Useful for testing.
     $('#spacer').css("margin-top", window.innerHeight);
     $('h1').hide();
     $('.button').hide();
