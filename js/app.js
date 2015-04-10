@@ -6,6 +6,7 @@ $(document).ready(function(){
                 x_colors: 'Purples'
             });
             document.body.appendChild(pattern.canvas());
+    
     $('#spacer').css("margin-top", window.innerHeight);
     $('h1').hide();
     $('.button').hide();
