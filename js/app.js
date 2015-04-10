@@ -18,3 +18,9 @@ $('#scroll').click(function(){
     scrollTop: $("#spacer").offset().top
 }, 1000);
 });
+
+$('.button').hover(function(){
+    $('.button').animate({backgroundColor:'white', color: '#806bc9'});
+}, function(){
+    $('.button').animate({backgroundColor: 'rgba(0, 0, 0, 0)' , color: 'white'});
+});
