@@ -1,7 +1,11 @@
 $(document).ready(function(){
-    var t = new Trianglify();
-var pattern = t.generate(document.body.clientWidth, document.body.clientHeight);
-document.body.setAttribute('style', 'background-image: '+pattern.dataUrl);
+    var pattern = Trianglify({
+                height: window.innerHeight * 3,
+                width: window.innerWidth,
+                cell_size: 100,
+                x_colors: 'Purples'
+            });
+            document.body.appendChild(pattern.canvas());
     $('#spacer').css("margin-top", window.innerHeight);
     $('h1').hide();
     $('.button').hide();
