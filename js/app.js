@@ -1,7 +1,7 @@
 $(document).ready(function(){
     var pattern = Trianglify({
                 height: window.innerHeight,
-                width: window.innerWidth - 2,
+                width: window.innerWidth,
                 cell_size: 100,
                 x_colors: 'Purples'
             });
@@ -10,6 +10,7 @@ $(document).ready(function(){
     $('.button').css("left", (window.innerWidth/2 - 23));
     $('.button2').css("left", (window.innerWidth/2 - 23));
     $('.button').css("top", (window.innerHeight - 60));
+    $('h4').css("top", (window.innerHeight * 8/7));
     $('.button2').css("top", (window.innerHeight * 2 - 60));
     $('#about').css("height", window.innerHeight);
     $('#about').css("margin-top", (window.innerHeight - 375)/3);
