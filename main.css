@@ -67,6 +67,10 @@ a{
     text-decoration: none;
 }
 
+a:hover{
+    font-size: 64px;
+}
+
 h5{
     font-family: 'walkway_boldregular';
     position: absolute;
