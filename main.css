@@ -83,14 +83,15 @@ h5{
 .button{
     position: absolute;
     font-family: 'walkway_boldregular';
-    width: 45px;
-    height: 45px;
+    width: 46px;
+    height: 46px;
     text-decoration: none;
     border: 2px solid white;
     border-radius: 100%;
     color:white;
     font-size: 20px;
-    background-color: rgba(0, 0, 0, 0);
+    text-align: center;
+    background:transparent url("img/down-white.png") center top no-repeat;
 }
 
 .button2{
@@ -104,7 +105,8 @@ h5{
     border-radius: 100%;
     color:white;
     font-size: 20px;
-    background-color: rgba(0, 0, 0, 0);
+    text-align: center;
+    background:transparent url("img/down-purple.png") center top no-repeat;
 }
 
 #about{
