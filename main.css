@@ -57,13 +57,23 @@ h1{
     font-size: 500px;
 }
 
-h4{
+a{
     font-family: 'walkway_boldregular';
     position: absolute;
     left: 0;
     right: 0;
-    font-size: 50px;
+    font-size: 58px;
     color: #806bc9;
+    text-decoration: none;
+}
+
+h5{
+    font-family: 'walkway_boldregular';
+    position: absolute;
+    left: 0;
+    right: 0;
+    font-size: 30px;
+    color: #5d5089;
 }
 
 .button{

@@ -10,7 +10,8 @@ $(document).ready(function(){
     $('.button').css("left", (window.innerWidth/2 - 23));
     $('.button2').css("left", (window.innerWidth/2 - 23));
     $('.button').css("top", (window.innerHeight - 60));
-    $('h4').css("top", (window.innerHeight * 8/7));
+    $('a').css("top", (window.innerHeight * 8/7) + 100);
+    $('h5').css("top", (window.innerHeight * 8/7) + 150);
     $('.button2').css("top", (window.innerHeight * 2 - 60));
     $('#about').css("height", window.innerHeight);
     $('#about').css("margin-top", (window.innerHeight - 375)/3);
