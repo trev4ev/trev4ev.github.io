@@ -1,7 +1,7 @@
 $(document).ready(function(){
     var pattern = Trianglify({
                 height: window.innerHeight,
-                width: window.innerWidth,
+                width: window.innerWidth - 2,
                 cell_size: 100,
                 x_colors: 'Purples'
             });
