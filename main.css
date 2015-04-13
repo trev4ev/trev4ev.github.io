@@ -37,7 +37,7 @@
 
 }
 
-#intro{
+#body{
     left: 0;
     right:0;
     position:absolute;
@@ -50,28 +50,38 @@ body{
 
 h1{
     font-family: 'optimusprincepssemiboldRg';
-    margin-bottom: -80px;
-    margin-top: -15px;
+    margin-bottom: -20px;
+    margin-top: -10px;
     font-size: 500px;
 }
 
 .button{
-    left: 0;
-    right:0;
+    position: absolute;
     font-family: 'walkway_boldregular';
-    width: 120px;
+    width: 45px;
+    height: 45px;
     text-decoration: none;
-    padding: 20px;
     border: 2px solid white;
-    border-radius: 15px;
+    border-radius: 100%;
     color:white;
     font-size: 20px;
     background-color: rgba(0, 0, 0, 0);
 }
 
-#spacer{
-    position:absolute;
-    width: 100%;
-    margin-top: 60px;
-    background-color: white;
+.button2{
+    position: absolute;
+    font-family: 'walkway_boldregular';
+    top: 30px;
+    width: 46px;
+    height: 46px;
+    text-decoration: none;
+    border: 2px solid #806bc9;
+    border-radius: 100%;
+    color:white;
+    font-size: 20px;
+    background-color: rgba(0, 0, 0, 0);
 }
+
+#about{
+}
+
