@@ -18,9 +18,15 @@ $(document).ready(function(){
     $('h1').hide();
     $('.button').hide();
     $('.button2').hide();
+    $('h5').hide();
+    $('a').hide();
+    $('#about').hide();
     $('h1').delay(1000).fadeIn(1000);
     $('.button').delay(1400).fadeIn(700);
     $('.button2').delay(1400).fadeIn(700);
+    $('h5').delay(1400).fadeIn(700);
+    $('a').delay(1400).fadeIn(700);
+    $('#about').delay(1400).fadeIn(700);
 });
 
 $('#scroll').click(function(){
