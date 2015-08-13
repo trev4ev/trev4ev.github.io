@@ -26,21 +26,23 @@ body {
 }
 
 #title {
-    margin-top: 35vh;
-    border-top: 3px white solid;
-    border-bottom: 3px white solid;
+    margin-top: 30vh;
+    border-top: 0.5vh white solid;
+    border-bottom: 0.5vh white solid;
     border-radius: 10%;
-    padding: 12px;
+    padding: 3vh;
     padding-top: 0px;
     display: inline-block;
     font-family: 'cocomatlight';
     color: white;
+    font-size: 8vh;
 }
 
 #title-description {
     display: block;
     font-family: 'cocomatlight';
     color: white;
+    font-size: 3.5vh;
     
 }
 
@@ -59,9 +61,9 @@ body {
 }
 
 .icon {
-    width: 55%;
-    height: 55%;
-    border: 3px white solid;
+    width: 20vw;
+    height: 20vw;
+    border: 0.5vw white solid;
     border-radius: 100%;
     margin: auto;
     margin-top: 10%;
