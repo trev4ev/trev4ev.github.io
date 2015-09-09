@@ -9,14 +9,14 @@ body {
     color: white;
     font-family: 'Roboto Condensed', sans-serif;
     font-weight: 700;
-    font-size: 8vh;
+    font-size: 4vw;
 }
 
 .club-info {
     color: rgb(214, 214, 214);
     font-family: 'Roboto Condensed', sans-serif;
     font-weight: 400;
-    font-size: 4vh;
+    font-size: 2vw;
     list-style-type: none;
     padding: 0;
     margin: 0;
