@@ -4,6 +4,7 @@
         <title>Text To HTML</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link href='https://fonts.googleapis.com/css?family=Raleway:800' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Biryani' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" type="text/css" href="main.css">
     </head>
     <body>
@@ -11,15 +12,15 @@
             <p id = "textArea"></p>
         </div>
         
-        Title:<br>
+        Title<br>
         <textarea id = "title"></textarea><br>
-        Font Size:<br>
+        Font Size<br>
         <textarea id = "fontSize"></textarea><br>
-        Font Color:<br>
+        Font Color<br>
         <textarea id = "fontColor"></textarea><br>
-        Background Color:<br>
+        Background Color<br>
         <textarea id = "bgColor"></textarea><br>
-        Text:<br>
+        Text<br>
         <textarea cols = "40" rows = "5" id = "textInput"></textarea><br>
         
         <button type = "button" onclick= "convert()">Submit</button>
@@ -45,13 +46,13 @@
                 var bgColor = document.getElementById("bgColor").value;
                 document.body.style.backgroundColor = bgColor;     
                 
-                if(bgColor == "black")
+                if(bgColor == "white")
                 {
-                    document.body.style.color = "white";
+                    document.body.style.color = "black";
                 }
                 else
                 {
-                    document.body.style.color = "black";
+                    document.body.style.color = "white";
                 }
                 document.getElementById("full").style.height = "100vh";
             }

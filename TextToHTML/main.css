@@ -1,6 +1,36 @@
-body{
+body {
     text-align: center;
+    font-family: 'Biryani';
+    font-size: 2vh;
+    background-color: rgb(198, 84, 239);
+    color: white;
 }
+
+textarea {
+    border: 3px solid black;
+}
+
+textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {   
+    border-color: rgb(171, 0, 203);
+    outline: 0 none;
+}
+
+button { 
+    width: 80px;
+    height: 35px;
+    font-family: 'Biryani';
+    font-size: 12px;
+    border-radius: 5px;
+    background-color: white;
+    outline: 0 none;
+    border: 3px solid black;
+    shadow: none;
+}
+
+button:active {
+    border-color: white;
+}
+
 #textArea {
     font-family: 'Raleway';
 }
