@@ -11,7 +11,7 @@ textarea {
 }
 
 textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {   
-    border-color: rgb(171, 0, 203);
+    border-color: rgb(154, 154, 154);
     outline: 0 none;
 }
 
