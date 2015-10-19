@@ -2,7 +2,7 @@ body {
     text-align: center;
     font-family: 'Biryani';
     font-size: 15px;
-    background-color: rgb(198, 84, 239);
+    background-color: black;
     color: white;
 }
 
@@ -11,7 +11,7 @@ textarea {
 }
 
 textarea:focus, input:focus, input[type]:focus, .uneditable-input:focus {   
-    border-color: rgb(154, 154, 154);
+    border-color: rgb(15,200,15);
     outline: 0 none;
 }
 
@@ -27,8 +27,8 @@ button {
     shadow: none;
 }
 
-button:active {
-    border-color: white;
+button:hover {
+    border-color: rgb(15,200,15);
 }
 
 #textArea {
