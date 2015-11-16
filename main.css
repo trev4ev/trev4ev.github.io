@@ -1,114 +1,75 @@
-@font-face {
-    font-family: 'walkway_boldregular';
-    src: url('fonts/Walkway Bold-webfont.eot');
-    src: url('fonts/Walkway Bold-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/Walkway Bold-webfont.woff2') format('woff2'),
-         url('fonts/Walkway Bold-webfont.woff') format('woff'),
-         url('fonts/Walkway Bold-webfont.ttf') format('truetype'),
-         url('fonts/Walkway Bold-webfont.svg#walkway_boldregular') format('svg');
-    font-weight: normal;
-    font-style: normal;
-
+::selection {
+  background: #e7cfff; /* WebKit/Blink Browsers */
+}
+::-moz-selection {
+  background: #e7cfff; /* Gecko Browsers */
 }
 
-@font-face {
-    font-family: 'optimusprincepsregular';
-    src: url('fonts/OptimusPrinceps/OptimusPrinceps-webfont.eot');
-    src: url('fonts/OptimusPrinceps/OptimusPrinceps-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OptimusPrinceps/OptimusPrinceps-webfont.woff2') format('woff2'),
-         url('fonts/OptimusPrinceps/OptimusPrinceps-webfont.woff') format('woff'),
-         url('fonts/OptimusPrinceps/OptimusPrinceps-webfont.ttf') format('truetype'),
-         url('fonts/OptimusPrinceps/OptimusPrinceps-webfont.svg#optimusprincepsregular') format('svg');
-    font-weight: normal;
-    font-style: normal;
-
+body {
+    background-color: rgb(173, 113, 255);
 }
 
-@font-face {
-    font-family: 'optimusprincepssemiboldRg';
-    src: url('fonts/OptimusPrinceps/OptimusPrincepsSemiBold-webfont.eot');
-    src: url('fonts/OptimusPrinceps/OptimusPrincepsSemiBold-webfont.eot?#iefix') format('embedded-opentype'),
-         url('fonts/OptimusPrinceps/OptimusPrincepsSemiBold-webfont.woff2') format('woff2'),
-         url('fonts/OptimusPrinceps/OptimusPrincepsSemiBold-webfont.woff') format('woff'),
-         url('fonts/OptimusPrinceps/OptimusPrincepsSemiBold-webfont.ttf') format('truetype'),
-         url('fonts/OptimusPrinceps/OptimusPrincepsSemiBold-webfont.svg#optimusprincepssemiboldRg') format('svg');
-    font-weight: normal;
-    font-style: normal;
-
+.box {
+    background-color: white;
+    text-align: center;
+    margin: auto; 
+    box-shadow: 5px 5px 15px rgba(34, 34, 34, 0.53);
+    border-radius: 3px;
 }
 
-#body{
-    left: 0;
-    right:0;
-    position:absolute;
-    color: white;
-    
+.inner-box {
+    background-color: white;
+    margin: auto; 
+    box-shadow: 2px 2px 5px rgba(34, 34, 34, 0.67);
+    border-radius: 3px;
+    width: 600px;
+    text-align: left;
+    margin-bottom: 30px;
 }
 
-body{
+#title { 
+    width: 540px;
+    margin-top: 90px; 
+}
+
+#description {
+    width: 650px;
+    margin-top: 90px;
+    padding-bottom: 15px;
+}
+
+h1 {
+    color: rgb(173, 113, 255); 
+    font-size: 78px;
+    font-family: 'Poppins';
+    font-weight: 300;
     margin: 0;
-    overflow-x:hidden;
+    padding: 0;
+    padding-top: 4px;
 }
 
-h1{
-    font-family: 'optimusprincepssemiboldRg';
-    margin-bottom: -20px;
-    margin-top: -10px;
-    font-size: 500px;
+h2 {
+    color: rgb(101, 101, 101);
+    font-size: 17px;
+    font-family: 'Poppins';
+    font-weight: 300;
+    margin-top: -18px;
+    padding-bottom: 15px;
 }
 
-a{
-    font-family: 'walkway_boldregular';
-    position: absolute;
-    left: 0;
-    right: 0;
-    font-size: 58px;
-    color: #806bc9;
-    text-decoration: none;
+h3 {
+    color: rgb(173, 113, 255);
+    font-size: 40px;
+    font-family: 'Poppins';
+    margin: 0;
+    padding: 0;
+    padding-top: 10px;
 }
 
-a:hover{
-    font-size: 64px;
+h4 {
+    color: rgb(101, 101, 101);
+    font-size: 14px;
+    font-family: 'Poppins';
+    margin: 0;
+    padding: 10px;
 }
-
-h5{
-    font-family: 'walkway_boldregular';
-    position: absolute;
-    left: 0;
-    right: 0;
-    font-size: 30px;
-    color: #5d5089;
-}
-
-.button{
-    position: absolute;
-    font-family: 'walkway_boldregular';
-    width: 46px;
-    height: 46px;
-    text-decoration: none;
-    border: 2px solid white;
-    border-radius: 100%;
-    color:white;
-    font-size: 20px;
-    text-align: center;
-    background:transparent url("img/down-white.png") center top no-repeat;
-}
-
-.button2{
-    position: absolute;
-    font-family: 'walkway_boldregular';
-    top: 30px;
-    width: 46px;
-    height: 46px;
-    text-decoration: none;
-    border: 2px solid #806bc9;
-    border-radius: 100%;
-    color:white;
-    font-size: 20px;
-    text-align: center;
-    background:transparent url("img/down-purple.png") center top no-repeat;
-}
-
-#about{
-}
-
