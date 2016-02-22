@@ -3,12 +3,37 @@
 	<head>
 		<title>Trevor Aquino</title>
 		<link rel = "stylesheet" type = "text/css" href = "main.css">
-        <link href='https://fonts.googleapis.com/css?family=Poppins:300' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Dosis:400,200' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Bitter:700' rel='stylesheet' type='text/css'>
 	</head>
 	<body>
 		<div id = 'box'>
             <h1>TA</h1>
         </div>
+        <div id = 'description'>
+            <h2>I'm Trevor, a high schooler who enjoys game development, website creation, and logo design.</h2>
+        </div>
+        <div id = 'logo-box'>
+            <a href = 'https://www.behance.net/trev4ev' target="_blank">
+                <img src = 'img/behance-white.png' onmouseover="hover(this, 'behance')" onmouseout="leave(this, 'behance')">
+            </a>
+            <a href = 'http://devpost.com/trev4ev' target="_blank">
+                <img src = 'img/devpost-white.png' onmouseover="hover(this, 'devpost')" onmouseout="leave(this, 'devpost')">
+            </a>
+            <a href = 'https://github.com/trev4ev' target="_blank">
+                <img src = 'img/github-white.png' onmouseover="hover(this, 'github')" onmouseout="leave(this, 'github')">
+            </a>
+        </div>
+        
+        <script>
+            function hover(element, id)
+            {
+                element.setAttribute('src', 'img/' + id + '-blue.png');
+            }
+            function leave(element, id)
+            {
+                element.setAttribute('src', 'img/' + id + '-white.png');
+            }
+        </script>
 	</body>
 </html>

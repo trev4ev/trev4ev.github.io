@@ -15,7 +15,7 @@ body {
     width: 40vh;
     height: 40vh;
     margin: auto;
-    margin-top: 25vh;
+    margin-top: 20vh;
     text-align: center;
 }
 
@@ -27,10 +27,26 @@ h1 {
     font-family: 'Bitter';
 }
 
-h2 {
-    font-size: 4vh;
-    color: #7AA5D2;
-    font-family: 'Poppins';
-    margin-top: 1vh;
+#description {
+    width: 45vh;
+    margin: auto;
 }
+
+h2 {
+    color: white;
+    font-family: 'Dosis';
+    font-weight: 200;
+}
+
+
+img {
+    width: 30px;
+    height: 30px;
+    margin: 10px; 
+}
+
+
+
+
+
 
