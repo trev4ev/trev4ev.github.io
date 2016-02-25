@@ -17,6 +17,7 @@ body {
     margin: auto;
     margin-top: 20vh;
     text-align: center;
+    opacity: 0;
 }
 
 h1 {
@@ -30,6 +31,8 @@ h1 {
 #description {
     width: 420px;
     margin: auto;
+    margin-top: -4vh;
+    opacity: 0;
 }
 
 h2 {
@@ -38,6 +41,10 @@ h2 {
     font-weight: 200;
 }
 
+#logo-box{
+    opacity: 0;
+    margin-top: -4vh;
+}
 
 img {
     width: 30px;

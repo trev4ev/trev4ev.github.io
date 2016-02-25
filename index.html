@@ -27,7 +27,8 @@
                 <img src = 'img/mail-white.png' onmouseover="hover(this, 'mail')" onmouseout="leave(this, 'mail')">
             </a>
         </div>
-        
+
+        <script src = "js/jquery.js"></script>
         <script>
             function hover(element, id)
             {
@@ -37,6 +38,13 @@
             {
                 element.setAttribute('src', 'img/' + id + '-white.png');
             }
+            
+            $(document).ready(function(){
+                $('#box').animate({opacity: "1"}, 4000);
+                $('#description').delay(1000).animate({opacity: "1", marginTop: '0'}, 2000);
+                $('#logo-box').delay(2300).animate({opacity: "1", marginTop: '0'}, 2000);
+                
+            });
         </script>
 	</body>
 </html>
