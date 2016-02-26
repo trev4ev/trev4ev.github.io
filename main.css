@@ -49,11 +49,11 @@ h2 {
 
 .circle {
     position: fixed;
-    width: 10px;
-    height: 10px;
+    width: 30px;
+    height: 30px;
     background-color: white;
     border-radius: 100%;
-    opacity: 0.4;
+    opacity: 0.001;
     top: 0;
     left: 0;
 }
