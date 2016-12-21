@@ -16,15 +16,15 @@ setInterval(function(){
     document.getElementById('body').appendChild(e);
     leftValue =  Math.floor(Math.random() * window.innerWidth) + "px";
     topValue = Math.floor(Math.random() * window.innerHeight) + "px";
-    $('#temp').animate({opacity: '0.3'}, 200);
-    $('#temp').animate({left: leftValue, top: topValue}, Math.floor((Math.random() * 5)+5)*1000);
+    $('#temp').animate({opacity: '0.4'}, 200);
+    $('#temp').animate({left: leftValue, top: topValue, backgroundColor: '#243071'}, Math.floor((Math.random() * 5)+5)*1000);
     $('#temp').animate({opacity: '0'}, 1000);
     document.getElementById('temp').setAttribute('id', "done");
     if($('#done').css('opacity') == '0')
     {
         $('#done').remove();
     }
-},300);
+},600);
 
     
             
