@@ -7,15 +7,16 @@
     }
 
 body {
-    background-color: white;
+    background-color: #303841;
     text-align: center;
 }
 
 #box {
+    border: #EEEEEE 3px solid;
     width: 40vh;
     height: 40vh;
     margin: auto;
-    margin-top: 24vh;
+    margin-top: 20vh;
     text-align: center;
     opacity: 0;
 }
@@ -29,14 +30,14 @@ h1 {
 }
 
 #description {
-    width: 480px;
+    width: 420px;
     margin: auto;
     margin-top: -4vh;
     opacity: 0;
 }
 
 h2 {
-    color: #243071;
+    color: white;
     font-family: 'Dosis';
     font-weight: 200;
 }
@@ -48,18 +49,19 @@ h2 {
 
 .circle {
     position: fixed;
-    width: 60px;
-    height: 60px;
-    background-color: #f277c1;
+    width: 35px;
+    height: 35px;
+    background-color: white;
     border-radius: 100%;
     opacity: 0.001;
     top: 0;
     left: 0;
-    z-index: -1;
 }
 
 img {
-    width: 40vh;
+    width: 30px;
+    height: 30px;
+    margin: 10px; 
 }
 
 

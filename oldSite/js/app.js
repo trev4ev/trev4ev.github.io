@@ -16,7 +16,7 @@ setInterval(function(){
     document.getElementById('body').appendChild(e);
     leftValue =  Math.floor(Math.random() * window.innerWidth) + "px";
     topValue = Math.floor(Math.random() * window.innerHeight) + "px";
-    $('#temp').animate({opacity: '0.3'}, 200);
+    $('#temp').animate({opacity: '0.4'}, 200);
     $('#temp').animate({left: leftValue, top: topValue}, Math.floor((Math.random() * 5)+5)*1000);
     $('#temp').animate({opacity: '0'}, 1000);
     document.getElementById('temp').setAttribute('id', "done");
@@ -26,6 +26,16 @@ setInterval(function(){
     }
 },300);
 
+function hover(element, id)
+{
+    logo = false;
+    element.setAttribute('src', 'img/' + id + '-blue.png');
+}
+function leave(element, id)
+{
+    logo = true;
+    element.setAttribute('src', 'img/' + id + '-white.png');
+}
     
             
 function mouseParticle(e)
@@ -41,4 +51,5 @@ $(document).ready(function()
 {
     $('#box').animate({opacity: "1"}, 4000);
     $('#description').delay(1000).animate({opacity: "1", marginTop: '0'}, 2000);
+    $('#logo-box').delay(2300).animate({opacity: "1", marginTop: '0'}, 2000);
 });
