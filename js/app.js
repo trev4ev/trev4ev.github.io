@@ -39,6 +39,6 @@ function mouseParticle(e)
             
 $(document).ready(function()
 {
-    $('#box').animate({opacity: "1"}, 4000);
-    $('#description').delay(1000).animate({opacity: "1", marginTop: '0'}, 2000);
+    $('#box').animate({opacity: "1"}, 3000);
+    $('#description').delay(500).animate({opacity: "1", marginTop: '0'}, 1000);
 });
