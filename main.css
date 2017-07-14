@@ -15,9 +15,9 @@ body {
     width: 40vh;
     height: 35vh;
     margin: auto;
-    margin-top: 24vh;
+    margin-top: 18vh;
     text-align: center;
-    opacity: 0;
+    opacity: 1;
 }
 
 h1 {
@@ -31,11 +31,11 @@ h1 {
 #description {
     width: 440px;
     margin: auto;
-    margin-top: -4vh;
-    opacity: 0;
+    opacity: 1;
 }
 
 h2 {
+    font-size: 26px;
     color: #243071;
     font-family: 'Dosis';
     font-weight: 200;
@@ -48,8 +48,8 @@ h2 {
 
 .circle {
     position: fixed;
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     background-color: #f277c1;
     border-radius: 100%;
     opacity: 0.001;
@@ -67,9 +67,24 @@ a:hover {
 }
 
 a {
+    text-decoration: none;
     color: #243071;
-    transition: color 0.5s;
-    -webkit-transition: color 0.5s;
+    transition: color 0.3s;
+    -webkit-transition: color 0.3s;
+}
+
+li {
+    margin: 20px;
+    margin-top: 5px;
+    font-size: 18px;
+    text-decoration: none;
+    display: inline-block;
+    font-family: 'Dosis';
+    font-weight: 200;
+}
+
+ul {
+    padding-left: 0;
 }
 
 

@@ -24,7 +24,7 @@ setInterval(function(){
     {
         $('#done').remove();
     }
-},600);
+},800);
 
     
             
@@ -39,6 +39,4 @@ function mouseParticle(e)
             
 $(document).ready(function()
 {
-    $('#box').animate({opacity: "1"}, 3000);
-    $('#description').delay(500).animate({opacity: "1", marginTop: '0'}, 1000);
 });
