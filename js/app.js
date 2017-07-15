@@ -1,12 +1,3 @@
-var x = 0;
-var y = 0;
-var logo = true;
-
-document.addEventListener('mousemove',function(event){ 
-    if(logo)
-        { mouseParticle(event); } 
-});
-
 setInterval(function(){
     var e = document.createElement('div');
     e.setAttribute('class', 'circle');
@@ -24,18 +15,7 @@ setInterval(function(){
     {
         $('#done').remove();
     }
-},800);
-
-    
-            
-function mouseParticle(e)
-{
-    x = e.clientX;
-    y = e.clientY;
-    
-    
-    //document.getElementById('temp').style.top = Math.floor(Math.random * window.innerHeight) + 'px';
-}
+},1200);
             
 $(document).ready(function()
 {
