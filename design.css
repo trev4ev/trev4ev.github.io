@@ -1,9 +1,11 @@
 body {
     text-align: center;
+    margin: 0
 }
 
 #header {
     width: 100vw;
+    margin: auto;
 }
 
 #box {

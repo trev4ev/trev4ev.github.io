@@ -11,13 +11,33 @@ body {
     text-align: center;
 }
 
-#box {
-    width: 40vh;
-    height: 35vh;
+#profile_image {
+    position: relative;
+    background: linear-gradient(90deg, #243071, #f277c1);
+    -webkit-border-radius:100%;
+    -moz-border-radius:100%;
+    border-radius:100%;
+    width:36vh;
+    height:36vh;
     margin: auto;
-    margin-top: 14vh;
+    margin-top: 8vh;
     text-align: center;
+}
+
+#profile_image:after {
+    position: absolute;
+    display: block;
+    top: 1vh;
+    left: 1vh;
+    width: 34vh;
+    height: 34vh;
     opacity: 1;
+    content: "";
+    background-color: #fff;
+    background-image: url("profile_bw.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 100%;
 }
 
 #description {
@@ -27,7 +47,7 @@ body {
     opacity: 1;
 }
 
-h2 {
+#front_page_text {
     font-size: 26px;
     color: #243071;
     font-family: 'Dosis';
