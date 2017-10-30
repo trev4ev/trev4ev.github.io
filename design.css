@@ -112,7 +112,7 @@ h4 {
     background-color: white;
 }
 
-@media only screen and (max-width: 768px){
+@media (orientation: portrait){
     #logo {
         width: 120px;
     }
@@ -124,5 +124,11 @@ h4 {
     li {
         font-size: 60px;
         margin-top: 15px;
+    }
+}
+
+@media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
+    .description {
+        opacity: 1;
     }
 }
