@@ -99,7 +99,7 @@ ul {
     padding-left: 0;
 }
 
-@media (orientation: portrait) {
+@media only screen and (max-width: 768px) {
     #front_page_text {
         font-size: 65px;
     }
