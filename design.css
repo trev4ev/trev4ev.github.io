@@ -10,6 +10,7 @@ body {
 
 #box {
     width: 100vw;
+    height: 15vh;
     margin: auto;
     margin-top: 2vh;
     text-align: center;
@@ -109,4 +110,19 @@ h4 {
 .button:hover {
     color: black;
     background-color: white;
+}
+
+@media (orientation: portrait){
+    #logo {
+        width: 120px;
+    }
+    
+    #box {
+        height: 120px;
+    }
+    
+    li {
+        font-size: 60px;
+        margin-top: 15px;
+    }
 }
