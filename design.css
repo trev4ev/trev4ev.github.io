@@ -7,7 +7,7 @@ body {
 }
 
 #box {
-    width: 15vh;
+    width: 100vw;
     margin: auto;
     margin-top: 2vh;
     text-align: center;
