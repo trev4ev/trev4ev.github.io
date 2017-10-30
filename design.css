@@ -113,6 +113,40 @@ h4 {
 }
 
 @media (orientation: portrait){
+    #front_page_text {
+        font-size: 65px;
+    }
+    
+    .button {
+        font-size: 28px;
+        padding: 8px 12px;
+        border-width: 4px;
+    }
+    
+    h2 {
+        margin-top: 15px;
+        margin-bottom: 0;
+        font-size: 40px;
+    }
+    
+    h4 {
+        margin-top: 15px;
+        font-size: 30px;
+    }
+    
+    .project {
+        width: 620px;
+    }
+    
+    .description {
+        width: 580px;
+    }
+    
+    .cardImg {
+        width: 100%;
+        height: auto;
+    }
+    
     #logo {
         width: 120px;
     }

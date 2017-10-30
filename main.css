@@ -99,12 +99,6 @@ ul {
     padding-left: 0;
 }
 
-@media (orientation: portrait) {
-    #front_page_text {
-        font-size: 65px;
-    }
-}
-
 
 
 
