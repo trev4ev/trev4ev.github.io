@@ -1,4 +1,4 @@
-setInterval(function(){
+/*setInterval(function(){
     var e = document.createElement('div');
     e.setAttribute('class', 'circle');
     e.setAttribute('id', 'temp');
@@ -15,8 +15,22 @@ setInterval(function(){
     {
         $('#done').remove();
     }
-},1200);
-            
+},1200);*/
+
+function scrollTo(div_name) {
+    div_name = div_name.replace("link",""); 
+    $('html,body').animate({scrollTop: $("#"+div_name).offset().top}, 400);
+}
+           
+$("a").click(function(e) {
+    if (this.id != "externallink") {
+      // Prevent a page reload when a link is pressed
+    e.preventDefault(); 
+      // Call the scroll function
+    scrollTo(this.id);
+    }
+});
+ 
 $(document).ready(function()
 {
 });

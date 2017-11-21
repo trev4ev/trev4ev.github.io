@@ -11,6 +11,10 @@ body {
     text-align: center;
 }
 
+#top {
+    height: 100vh;
+}
+
 #profile_image {
     position: relative;
     background: linear-gradient(90deg, #243071, #f277c1);
@@ -46,7 +50,7 @@ body {
     margin-top: 8vh;
     opacity: 1;
 }
-#front_page_text {
+.subtitle {
     font-size: 26px;
     color: #243071;
     font-family: 'Dosis';
@@ -71,7 +75,6 @@ body {
 }
 
 img {
-    width: 40vh;
 }
 
 a:hover {
@@ -100,6 +103,176 @@ ul {
 }
 
 
+body {
+    text-align: center;
+    margin: 0
+}
+
+#header {
+    margin: auto;
+}
+
+#box {
+    height: 15vh;
+    margin: auto;
+    margin-top: 2vh;
+    text-align: center;
+}
+
+#logo {
+    width: 15vh;
+}
+
+#content {
+    margin:auto;
+    text-align: center;
+    width: 90vw;
+}
+
+#projects, #design {
+    padding: 25px;
+}
+
+.card {
+    background-color: black;
+    width: 300px;
+    height: 300px;
+    margin: 10px;
+    border-radius: 10px;
+    display: inline-block;
+    box-shadow: 5px 5px 10px #a3a3a3;
+    overflow: hidden;
+}
+
+.cardImg {
+    border-radius: 10px;
+    height: 300px;
+}
+
+a:hover {
+    color: #f277c1;
+}
+
+a {
+    text-decoration: none;
+    color: #243071;
+    transition: color 0.3s;
+    -webkit-transition: color 0.3s;
+}
+
+li {
+    margin: 20px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 18px;
+    text-decoration: none;
+    display: inline-block;
+    font-family: 'Dosis';
+    font-weight: 200;
+}
+
+ul {
+    padding-left: 0;
+    margin: 0;
+}
+
+h2, h4 {
+    font-family: 'Dosis';
+    font-weight: 400;
+    color: white;
+}
+
+h4 {
+    margin-bottom: 30px;
+}
+
+.description {
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    -webkit-transition: opacity 0.3s;
+    padding: 20px;
+}
+
+.description:hover {
+    opacity: 1;
+}
+
+.button {
+    padding: 6px 10px;
+    margin: 4px;
+    border: 1px solid white;
+    border-radius: 5px;
+    color: white;
+    font-family: 'Dosis';
+    font-weight: 400; 
+    transition: none;
+    -webkit-transition: none;
+}
+
+.button:hover {
+    color: black;
+    background-color: white;
+}
+
+@media (orientation: portrait){
+    .subtitle {
+        font-size: 65px;
+    }
+    
+    .button {
+        font-size: 28px;
+        padding: 8px 12px;
+        border-width: 4px;
+    }
+    
+    h2 {
+        margin-top: 15px;
+        margin-bottom: 0;
+        font-size: 40px;
+    }
+    
+    h4 {
+        margin-top: 15px;
+        font-size: 30px;
+    }
+    
+    .project {
+        width: 620px;
+    }
+    
+    .description {
+        width: 580px;
+    }
+    
+    .cardImg {
+        width: 100%;
+        height: auto;
+    }
+    
+    #logo {
+        width: 120px;
+    }
+    
+    #box {
+        height: 120px;
+    }
+    
+    li {
+        font-size: 60px;
+        margin-top: 15px;
+    }
+}
+
+@media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
+    .description {
+        opacity: 1;
+    }
+}
 
 
 
