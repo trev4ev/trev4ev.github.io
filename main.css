@@ -219,34 +219,47 @@ h4 {
     background-color: white;
 }
 
+.wide_card {
+    width: 620px;
+}
+
 @media (orientation: portrait){
     .subtitle {
-        font-size: 65px;
+        font-size: 75px;
     }
     
     .button {
-        font-size: 28px;
-        padding: 8px 12px;
+        font-size: 34px;
+        padding: 12px 16px;
         border-width: 4px;
     }
     
     h2 {
         margin-top: 15px;
         margin-bottom: 0;
-        font-size: 40px;
+        font-size: 50px;
     }
     
     h4 {
-        margin-top: 15px;
-        font-size: 30px;
+        margin-top: 20px;
+        margin-bottom: 40px;
+        font-size: 40px;
     }
     
-    .project {
-        width: 620px;
+    .card {
+        width: 38vw;
+        margin: 2vw;
+        height: 38vw;
+    }
+
+    .project, .wide_card{
+        width: 80vw;
     }
     
     .description {
-        width: 580px;
+        height: 34vw;
+        width: 76vw;
+        padding: 2vw;
     }
     
     .cardImg {
@@ -265,6 +278,27 @@ h4 {
     li {
         font-size: 60px;
         margin-top: 15px;
+    }
+
+    #profile_image {
+        width: 55vw;
+        height: 55vw;
+        }
+    
+    #profile_image:after {
+        position: absolute;
+        display: block;
+        top: 1vw;
+        left: 1vw;
+        width: 53vw;
+        height: 53vw;
+        opacity: 1;
+        content: "";
+        background-color: #fff;
+        background-image: url("profile_bw.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        border-radius: 100%;
     }
 }
 
