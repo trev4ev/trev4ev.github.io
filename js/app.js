@@ -23,7 +23,7 @@ function scrollTo(div_name) {
 }
            
 $("a").click(function(e) {
-    if (this.id != "externallink") {
+    if (this.className == "scrolllink") {
       // Prevent a page reload when a link is pressed
     e.preventDefault(); 
       // Call the scroll function
