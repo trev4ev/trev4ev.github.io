@@ -45,7 +45,7 @@ body {
 }
 
 #description {
-    width: 80vw;
+    width: 94vw;
     margin: auto;
     margin-top: 8vh;
     opacity: 1;
@@ -129,7 +129,7 @@ body {
     width: 90vw;
 }
 
-#projects, #design {
+#experience, #projects, #design {
     padding: 25px;
 }
 
