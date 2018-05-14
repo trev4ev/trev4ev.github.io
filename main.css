@@ -182,6 +182,16 @@ h4 {
     width: 620px;
 }
 
+#codebaseImage {
+    width: 86%;
+    height: 86%;
+    margin-top: 7%;
+}
+
+#ethicalImage {
+    margin-left: -70px;
+}
+
 @media (orientation: portrait){
     .subtitle {
         font-size: 75px;
@@ -224,6 +234,15 @@ h4 {
     .cardImg {
         width: 100%;
         height: auto;
+    }
+
+    #ethicalImage {
+        margin-left: 0;
+    }
+
+    #codebaseImage {
+        height: 120%;
+        width: auto;
     }
     
     #logo {
