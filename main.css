@@ -7,7 +7,7 @@
     }
 
 body {
-    background-color: white;
+    background-color: black;
     text-align: center;
 }
 
@@ -15,24 +15,15 @@ body {
     height: 100vh;
 }
 
-#profile_image {
+#profile_image{
     position: relative;
-    background: linear-gradient(90deg, #243071, #f277c1);
+    border: 6px solid rgb(242,119,193);
     -webkit-border-radius:100%;
     -moz-border-radius:100%;
     border-radius:100%;
-    width:36vh;
-    height:36vh;
     margin: auto;
     margin-top: 8vh;
     text-align: center;
-}
-
-#profile_image:after {
-    position: absolute;
-    display: block;
-    top: 1vh;
-    left: 1vh;
     width: 34vh;
     height: 34vh;
     opacity: 1;
@@ -45,14 +36,14 @@ body {
 }
 
 #description {
-    width: 94vw;
+    width: 60vw;
     margin: auto;
     margin-top: 8vh;
     opacity: 1;
 }
 .subtitle {
     font-size: 26px;
-    color: #243071;
+    color: #f277c1;
     font-family: 'Dosis';
     font-weight: 200;
 }
@@ -64,8 +55,8 @@ body {
 
 .circle {
     position: fixed;
-    width: 10vw;
-    height: 10vw;
+    width: 8vw;
+    height: 8vw;
     background-color: #f277c1;
     border-radius: 100%;
     opacity: 0.001;
@@ -73,35 +64,6 @@ body {
     left: 0;
     z-index: -1;
 }
-
-img {
-}
-
-a:hover {
-    color: #f277c1;
-}
-
-a {
-    text-decoration: none;
-    color: #243071;
-    transition: color 0.3s;
-    -webkit-transition: color 0.3s;
-}
-
-li {
-    margin: 20px;
-    margin-top: 5px;
-    font-size: 18px;
-    text-decoration: none;
-    display: inline-block;
-    font-family: 'Dosis';
-    font-weight: 200;
-}
-
-ul {
-    padding-left: 0;
-}
-
 
 body {
     text-align: center;
@@ -138,24 +100,22 @@ body {
     width: 300px;
     height: 300px;
     margin: 10px;
-    border-radius: 10px;
     display: inline-block;
-    box-shadow: 5px 5px 10px #a3a3a3;
     overflow: hidden;
+    border-top: 6px solid rgb(242,119,193);
 }
 
 .cardImg {
-    border-radius: 10px;
     height: 300px;
 }
 
 a:hover {
-    color: #f277c1;
+    color: white;
 }
 
 a {
     text-decoration: none;
-    color: #243071;
+    color: #f277c1;
     transition: color 0.3s;
     -webkit-transition: color 0.3s;
 }
@@ -187,8 +147,7 @@ h4 {
 }
 
 .description {
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0,0,0,0.6);
     position: absolute;
     width: 260px;
     height: 260px;
@@ -268,11 +227,11 @@ h4 {
     }
     
     #logo {
-        width: 120px;
+        width: 160px;
     }
     
     #box {
-        height: 120px;
+        height: 160px;
     }
     
     li {
@@ -283,22 +242,17 @@ h4 {
     #profile_image {
         width: 55vw;
         height: 55vw;
-        }
+        margin-top: 10vh;
+    }
     
-    #profile_image:after {
-        position: absolute;
-        display: block;
-        top: 1vw;
-        left: 1vw;
-        width: 53vw;
-        height: 53vw;
-        opacity: 1;
-        content: "";
-        background-color: #fff;
-        background-image: url("profile_bw.jpg");
-        background-repeat: no-repeat;
-        background-size: cover;
-        border-radius: 100%;
+
+    #description {
+        width: 90vw;
+        margin-top: 10vh;
+    }
+
+    #description > h2 {
+        font-size: 60px;
     }
 }
 
