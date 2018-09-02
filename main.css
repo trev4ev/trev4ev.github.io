@@ -13,9 +13,14 @@ body {
 }
 
 #content {
-    margin-top: 45vh;
-    transform: translateY(-50%);
+    margin-top: 15vh;
     animation: fade-in 1.5s;
+}
+
+#profile {
+    width: 15vw;
+    border-radius: 100%;
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.6);
 }
 
 a:hover {
@@ -41,7 +46,7 @@ h1 {
     font-weight: 400;
     color: white;
     font-size: 60px;
-    margin-bottom: 20px;
+    margin: 10px auto 20px auto;
 }
 
 ul {
@@ -49,10 +54,19 @@ ul {
 }
 
 @media (orientation: portrait){
+    #content {
+        margin-top: 20vh;
+    }
+
     h1 {
         font-size: 140px;
         margin-bottom: 40px;
     }
+
+    #profile {
+        width: 50%;
+    }
+
     li, p {
         font-size: 50px;
     }
