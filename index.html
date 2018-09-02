@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html id = 'main'>
+<html>
 	<head>
             <!-- Global site tag (gtag.js) - Google Analytics -->
             <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83325513-2"></script>
@@ -33,108 +33,16 @@
             <meta name="theme-color" content="#ffffff">
             <link href='https://fonts.googleapis.com/css?family=Dosis:400,200' rel='stylesheet' type='text/css'>
 	</head>
-	<body id = 'body'>
-            <div id = 'top'>
-                <div id = 'box'>
-                    <a href = index.html><img id = "logo" src = TA-01.png></a>
-                </div>
-                <div id = 'header'>
-                    <!--
-                    <ul>
-                        <li><a href = "" class = "scrolllink" id = "experiencelink">Experience</a></li>
-                        <li><a href = "" class = "scrolllink" id = "projectslink">Projects</a></li>
-                        <li><a href = "" class = "scrolllink" id = "designlink">Design</a></li>
-                    </ul>
-                    --!>
-                    <ul>
-                        <li><a href = "https://www.linkedin.com/in/trevoraquino/" target="_blank">LinkedIn</a></li>
-                        <li><a href = "https://github.com/trev4ev" target="_blank">GitHub</a></li>
-                        <li><a href = "Trevor_Aquino_Resume.pdf" target="_blank">Resume</a></li>
-                        <li><a href = "mailto:trevoraquino@gmail.com" >Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <div id = "profile_image"></div>
-                    <div id = 'description'>
-                    <h2 class = "subtitle">Hi, I'm <span style = "font-weight: 400;">Trevor Aquino</span>, a student at UC Berkeley studying EECS. While I'm not coding or designing, I enjoy dancing and playing ultimate frisbee.</h2>
-                    </div>
-                </div>
+	<body>
+            <div id = 'content'>
+                <h1>Trevor Aquino</h1>
+                <p>UC Berkeley Class of 2021, EECS Major</p>
+                <ul>
+                    <li><a href = "https://www.linkedin.com/in/trevoraquino/" target="_blank">LinkedIn</a></li>
+                    <li><a href = "https://github.com/trev4ev" target="_blank">GitHub</a></li>
+                    <li><a href = "Trevor_Aquino_Resume.pdf" target="_blank">Resume</a></li>
+                    <li><a href = "mailto:trevoraquino@gmail.com" target="_blank">Contact</a></li>
+                </ul>
             </div>
-            <div id = 'experience'>
-                <h2 class = "subtitle" style = "font-weight: 400;">Experience</h2>
-                <div class = "card project" style = "background-color: white">
-                    <div class = "description">
-                        <h2>Codebase Contract Software Developer</h2>
-                        <h4>Built an entire React-native app from scratch for the startup Propel(x).</h4>
-                        <a class = "button" href = "https://www.propelx.com/" target="_blank">Website</a>
-                    </div>
-                    <img class = "cardImg" id="codebaseImage" src = "ExperienceThumbnails/Codebase.png" style = "" >
-                </div>
-                <div class = "card project" style = "background-color: white">
-                    <div class = "description">
-                        <h2>EthiCAL Apparel Web Developer</h2>
-                        <h4>Re-designed the business' front page and made the website mobile-responsive.</h4>
-                        <a class = "button" href = "https://ethicalapparel.org/" target="_blank">Website</a>
-                    </div>
-                    <img class = "cardImg" id="ethicalImage" src = "ExperienceThumbnails/EthiCAL2.png" style = "" >
-                </div>
-                <div class = "card project" style = "background-color: white">
-                    <div class = "description">
-                        <h2>FitBliss Web Development Intern</h2>
-                        <h4>Helped design and develop the startup's main dashboard with FitBit integration.</h4>
-                        <a class = "button" href = "http://fitbliss.com/" target="_blank">Website</a>
-                    </div>
-                    <img class = "cardImg" src = "ExperienceThumbnails/FitBliss.png">
-                </div>
-            </div> 
-            <div id = 'projects'>
-                <h2 class = "subtitle" style = "font-weight: 400;">Projects</h2>
-                <div class = "card project">
-                    <div class = "description">
-                        <h2>Formations</h2>
-                        <h4>A web application that allows choreographers to create and share their formations.</h4>
-                        <a class = "button" href = "https://docs.google.com/document/d/1gaC_XIDtyMHLzibBkV2BV64bXHTTKrBHy_3soZIIeGs/edit?usp=sharing" target="_blank">Website</a>
-                        <a class = "button" href = "https://github.com/trev4ev/Formations" target="_blank">Code</a>
-                    </div>
-                    <img class = "cardImg" style = "margin-left: -58px;" src = "ProjectThumbnails/Formations.png">
-                </div>
-                <div class = "card project">
-                    <div class = "description">
-                        <h2>Panda Bot</h2>
-                        <h4>A Facebook messenger bot that keeps track of a group chat's action items and to-do list.</h4>
-                        <a class = "button" href = "http://trev4ev.github.io/Panda-Bot/" target="_blank">Website</a>
-                        <a class = "button" href = "https://github.com/trev4ev/PandaBot" target="_blank">Code</a>
-                    </div>
-                    <img class = "cardImg" src = "ProjectThumbnails/PandaBot.png">
-                </div>
-                <div class = "card project">
-                    <div class = "description">
-                        <h2>Project Gon</h2>
-                        <h4>A single-player fighting game made completely from scratch for my AP Computer Science final.</h4>
-                        <a class = "button" href = "https://github.com/trev4ev/ProjectGon" target="_blank">Code</a>
-                    </div>
-                    <img class = "cardImg" src = "ProjectThumbnails/ProjectGon.png">
-                </div>
-                
-            </div>
-            <div id = 'design'>
-                <h2 class = "subtitle" style = "font-weight: 400;">Design</h2>
-                <div class = "wide_card card" style="background-color: #3a3a3a">
-                    <img class = "cardImg" src = "DesignThumbnails/ChallengeStigmaCropped.png">
-                </div>
-                <div class = "card" style = "background-color: white">
-                    <img class = "cardImg" src = "DesignThumbnails/SnapchatFilter.png">
-                </div>
-                <div class = "card">
-                    <img class = "cardImg" src = "DesignThumbnails/SquadCropped.png">
-                </div>
-                <div class = "wide_card card">
-                    <img class = "cardImg" src = "DesignThumbnails/MarshieCropped.png">
-                </div>
-                
-            </div>
-            <script src = "js/jquery.js"></script>
-            <script src = "js/jquery.color.js"></script>
-            <script src = "js/app.js"></script>
 	</body>
 </html>

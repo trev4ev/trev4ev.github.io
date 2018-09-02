@@ -1,277 +1,60 @@
-::-moz-selection{
-    background-color:Transparent;
-    }
-
-    ::selection {
-    background-color:Transparent;
-    }
-
 body {
-    background-color: black;
+    background: #FC5C7D;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to right, #6A82FB, #FC5C7D);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #6A82FB, #FC5C7D); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     text-align: center;
-}
-
-#top {
-    height: 100vh;
-}
-
-#profile_image{
-    position: relative;
-    border: 6px solid rgb(242,119,193);
-    -webkit-border-radius:100%;
-    -moz-border-radius:100%;
-    border-radius:100%;
-    margin: auto;
-    margin-top: 8vh;
-    text-align: center;
-    width: 34vh;
-    height: 34vh;
-    opacity: 1;
-    content: "";
-    background-color: #fff;
-    background-image: url("profile_bw.jpg");
-    background-repeat: no-repeat;
-    background-size: cover;
-    border-radius: 100%;
-}
-
-#description {
-    width: 60vw;
-    margin: auto;
-    margin-top: 8vh;
-    opacity: 1;
-}
-.subtitle {
-    font-size: 26px;
-    color: #f277c1;
     font-family: 'Dosis';
-    font-weight: 200;
 }
 
-#logo-box{
-    opacity: 0;
-    margin-top: -4vh;
-}
-
-.circle {
-    position: fixed;
-    width: 8vw;
-    height: 8vw;
-    background-color: #f277c1;
-    border-radius: 100%;
-    opacity: 0.001;
-    top: 0;
-    left: 0;
-    z-index: -1;
-}
-
-body {
-    text-align: center;
-    margin: 0
-}
-
-#header {
-    margin: auto;
-}
-
-#box {
-    height: 15vh;
-    margin: auto;
-    margin-top: 2vh;
-    text-align: center;
-}
-
-#logo {
-    width: 15vh;
+@keyframes fade-in {
+    0% {opacity: 0;}
+    20% {opacity: 0;}
+    100% {opacity: 1;}
 }
 
 #content {
-    margin:auto;
-    text-align: center;
-    width: 90vw;
-}
-
-#experience, #projects, #design {
-    padding: 25px;
-}
-
-.card {
-    background-color: black;
-    width: 300px;
-    height: 300px;
-    margin: 10px;
-    display: inline-block;
-    overflow: hidden;
-    border-top: 6px solid rgb(242,119,193);
-}
-
-.cardImg {
-    height: 300px;
+    margin-top: 45vh;
+    transform: translateY(-50%);
+    animation: fade-in 1.5s;
 }
 
 a:hover {
-    color: white;
+    text-decoration: underline;
 }
 
 a {
-    text-decoration: none;
-    color: #f277c1;
-    transition: color 0.3s;
-    -webkit-transition: color 0.3s;
+    text-decoration: underline dotted;
+    color: white;
 }
 
-li {
-    margin: 20px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    font-size: 18px;
+li, p {
+    list-style-type: none;
+    margin: 5px 20px;
+    font-size: 24px;
     text-decoration: none;
-    display: inline-block;
-    font-family: 'Dosis';
     font-weight: 200;
+    display: inline-block;
+    color: white;
+}
+
+h1 {
+    font-weight: 400;
+    color: white;
+    font-size: 60px;
+    margin-bottom: 20px;
 }
 
 ul {
-    padding-left: 0;
-    margin: 0;
-}
-
-h2, h4 {
-    font-family: 'Dosis';
-    font-weight: 400;
-    color: white;
-}
-
-h4 {
-    margin-bottom: 30px;
-}
-
-.description {
-    background-color: rgba(0,0,0,0.6);
-    position: absolute;
-    width: 260px;
-    height: 260px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    -webkit-transition: opacity 0.3s;
-    padding: 20px;
-}
-
-.description:hover {
-    opacity: 1;
-}
-
-.button {
-    padding: 6px 10px;
-    margin: 4px;
-    border: 1px solid white;
-    border-radius: 5px;
-    color: white;
-    font-family: 'Dosis';
-    font-weight: 400; 
-    transition: none;
-    -webkit-transition: none;
-}
-
-.button:hover {
-    color: black;
-    background-color: white;
-}
-
-.wide_card {
-    width: 620px;
-}
-
-#codebaseImage {
-    width: 86%;
-    height: 86%;
-    margin-top: 7%;
-}
-
-#ethicalImage {
-    margin-left: -70px;
+    padding: 0;
 }
 
 @media (orientation: portrait){
-    .subtitle {
-        font-size: 75px;
-    }
-    
-    .button {
-        font-size: 34px;
-        padding: 12px 16px;
-        border-width: 4px;
-    }
-    
-    h2 {
-        margin-top: 15px;
-        margin-bottom: 0;
-        font-size: 50px;
-    }
-    
-    h4 {
-        margin-top: 20px;
+    h1 {
+        font-size: 140px;
         margin-bottom: 40px;
-        font-size: 40px;
     }
-    
-    .card {
-        width: 38vw;
-        margin: 2vw;
-        height: 38vw;
-    }
-
-    .project, .wide_card{
-        width: 80vw;
-    }
-    
-    .description {
-        height: 34vw;
-        width: 76vw;
-        padding: 2vw;
-    }
-    
-    .cardImg {
-        width: 100%;
-        height: auto;
-    }
-
-    #ethicalImage {
-        margin-left: 0;
-    }
-
-    #codebaseImage {
-        height: 120%;
-        width: auto;
-    }
-    
-    #logo {
-        width: 160px;
-    }
-    
-    #box {
-        height: 160px;
-    }
-    
-    li {
-        font-size: 60px;
-        margin-top: 15px;
-    }
-
-    #profile_image {
-        width: 55vw;
-        height: 55vw;
-        margin-top: 10vh;
-    }
-    
-
-    #description {
-        width: 90vw;
-        margin-top: 10vh;
-    }
-
-    #description > h2 {
-        font-size: 60px;
+    li, p {
+        font-size: 50px;
     }
 }
 
