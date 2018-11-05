@@ -1,0 +1,135 @@
+body {
+    background: rgb(242, 242, 242);
+    font-family: 'Noto Sans', sans-serif;
+    color: black;
+    text-align: center;
+}
+
+@keyframes fade-in {
+    0% {opacity: 0;}
+    20% {opacity: 0; transform: translateY(-30px);}
+    100% {opacity: 1; transform: translateY(0);}
+}
+
+#content {
+    margin: 25vh auto;
+    display: inline-block;
+    animation: fade-in 1.5s;
+    text-align: left;
+    width: auto;
+}
+
+h1, #name {
+    font-size: 24px;
+    margin-bottom: 5px;
+    position: relative;
+    display: inline-block;
+}
+
+a {
+    color: black;
+    text-decoration: none;
+    border-bottom: 1px solid black;
+    line-height: 1.3em;
+    display: inline-block;
+}
+
+#starbutter:after {
+    background: rgb(155, 202, 255);
+}
+
+#codebase:after {
+    background: rgb(143, 165, 255);
+}
+
+#ethical:after {
+    background: rgb(225, 233, 130);
+}
+
+#ugmo:after {
+    background: rgb(245, 241, 107);
+}
+
+a:after, #name:after {
+    /* source: http://emilyzhong.me/ with permission*/
+    content: "";
+    position: absolute;
+    background: #ffe0ab;
+    display: inline-block;
+    height: 0em;
+    width: 100%;
+    padding: 0 2px;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    z-index: -1;
+    transition: 0.3s; 
+}
+
+#name:after {
+    height: 1.4em;
+    width: 104%;
+}
+
+a:hover:after {
+    height: 1.4em;
+}
+
+ul {
+    margin-top: 0px;
+    padding-left: 24px;
+}
+
+li {
+    list-style-type: circle;
+    line-height: 1.6em;
+    font-size: 16px;
+}
+
+p {
+    margin: 0;
+    position: relative;
+    display: inline-block;
+}
+
+@media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
+    li, p, a, ul {
+        font-size: 26px;
+    }
+    h1, #name{
+        font-size: 36px;
+    }
+    #content {
+        margin-top: 10vh;
+    }
+}
+
+@media (orientation: portrait){
+    #content {
+        margin-top: 24vh;
+        width: 90%;
+        text-align: center;
+    }
+
+    h1, #name {
+        text-align: center;
+        font-size: 70px;
+        margin-bottom: 10px;
+    }
+
+    ul {
+        display: inline-block;
+        margin: auto;
+        text-align: left;
+        padding-left: 50px;
+        white-space: nowrap;
+    }
+
+    li, p, a, ul {
+        font-size: 42px;
+    }
+}
+
+
+
+
