@@ -1,5 +1,5 @@
 body {
-    background: rgb(242, 242, 242);
+    background: rgb(240,240,240);
     font-family: 'Noto Sans', sans-serif;
     color: black;
     text-align: center;
@@ -54,7 +54,7 @@ a:after, #name:after {
     /* source: http://emilyzhong.me/ with permission*/
     content: "";
     position: absolute;
-    background: #ffe0ab;
+    background: rgb(255, 204, 250);
     display: inline-block;
     height: 0em;
     width: 100%;
@@ -63,7 +63,7 @@ a:after, #name:after {
     bottom: 0;
     transform: translateX(-50%);
     z-index: -1;
-    transition: 0.3s; 
+    transition: 0.4s; 
 }
 
 #name:after {
