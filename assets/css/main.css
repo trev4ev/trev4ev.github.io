@@ -34,8 +34,8 @@ a {
     display: inline-block;
 }
 
-#starbutter:after {
-    background: rgb(155, 202, 255);
+#stripe:after {
+    background: #89bbf8;
 }
 
 #codebase:after {
