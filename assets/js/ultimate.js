@@ -12,8 +12,8 @@ if (!canvas || !logic) {
 }
 
 const UNIT = 0.42;
-const DISC_RADIUS = 0.72;
-const DISC_HOLD_SIDE = 6;
+const DISC_RADIUS = 0.5;
+const DISC_HOLD_SIDE = 5.5;
 const BODY_CENTER = 1.28;
 const game = logic.createGame();
 window.ultimateGame = game;
@@ -255,23 +255,19 @@ disc.add(discStar);
 scene.add(disc);
 
 function makeCrescent() {
-    const shape = new THREE.Shape();
-    shape.absarc(0, 0, 0.58, 0, Math.PI * 2, false);
-    const hole = new THREE.Path();
-    hole.absarc(0.2, 0.05, 0.4, 0, Math.PI * 2, true);
-    shape.holes.push(hole);
-    const geo = new THREE.ExtrudeGeometry(shape, {
-        depth: 0.07,
-        bevelEnabled: false,
-        curveSegments: 28
-    });
-    geo.center();
-    const mesh = new THREE.Mesh(geo, glossy(0xb892de, {
-        emissive: 0x9b74d0,
-        emissiveIntensity: 0.16
-    }));
+    const group = new THREE.Group();
+    const mesh = new THREE.Mesh(
+        new THREE.TorusGeometry(0.46, 0.1, 10, 28, Math.PI * 1.45),
+        glossy(0xb892de, {
+            emissive: 0x9b74d0,
+            emissiveIntensity: 0.16
+        })
+    );
+    mesh.rotation.z = Math.PI * 0.28;
     mesh.castShadow = true;
-    return mesh;
+    group.add(mesh);
+    group.userData.mesh = mesh;
+    return group;
 }
 
 const crescent = makeCrescent();
@@ -441,9 +437,10 @@ function placeActors(elapsed) {
         crescent.position.y += (game.power - 0.5) * 2.35;
         crescent.position.z += 0.15;
         crescent.lookAt(cameraPos.x, crescent.position.y, cameraPos.z);
-        crescent.material.color.setHex(inGood ? 0xe6d8f6 : 0xb892de);
-        crescent.material.emissive.setHex(inGood ? 0xc9b6e4 : 0x9b74d0);
-        crescent.material.emissiveIntensity = inGood ? 0.42 : 0.14;
+        const mat = crescent.userData.mesh.material;
+        mat.color.setHex(inGood ? 0xe6d8f6 : 0xb892de);
+        mat.emissive.setHex(inGood ? 0xc9b6e4 : 0x9b74d0);
+        mat.emissiveIntensity = inGood ? 0.42 : 0.14;
     }
 
     if (throwerMesh.visible) {
