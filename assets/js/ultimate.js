@@ -377,13 +377,11 @@ function placeActors(elapsed) {
         throwerMesh.position.copy(throwerWorld);
         throwerMesh.position.y = bob;
         throwerMesh.lookAt(receiverWorld.x, throwerMesh.position.y, receiverWorld.z);
-        throwerMesh.rotation.z = 0;
     }
 
     showActor(receiverMesh, receiverShadow);
     receiverMesh.position.copy(receiverWorld);
     receiverMesh.position.y = runBob;
-    receiverMesh.rotation.z = 0;
 
     downfieldPoint.set(receiverWorld.x, receiverWorld.y, receiverWorld.z + dir * 16);
     if (game.state === "throwing") {
@@ -391,7 +389,7 @@ function placeActors(elapsed) {
         const cutFrom = logic.cutStart(game);
         const cutFromWorld = fieldToWorld(cutFrom.x, cutFrom.y, 0);
         const sideLean = THREE.MathUtils.clamp((receiverWorld.x - cutFromWorld.x) * 0.03, -0.28, 0.28);
-        receiverMesh.rotation.z = -sideLean;
+        receiverMesh.rotateZ(-sideLean);
     } else if (caught) {
         const turn = Math.min(1, Math.max(0, (game.resultT - 0.05) / 0.85));
         const eased = turn * turn * (3 - 2 * turn);
