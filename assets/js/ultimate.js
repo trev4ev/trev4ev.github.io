@@ -258,7 +258,7 @@ const METER_LENGTH = 3.4;
 const METER_WIDTH = 0.34;
 const METER_BACK = 2.5;
 const METER_RIGHT = 0.85;
-const METER_YAW = 1.05;
+const METER_YAW = 0.88;
 const CAM_SIDE = -6.8;
 const LOOK_X = -3.1;
 
