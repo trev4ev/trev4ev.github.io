@@ -17,6 +17,14 @@
             <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700" rel="stylesheet">
             <link rel="icon" type="image/png" sizes="96x96" href="favicons.ico/favicon-96x96.png">
             <meta name="viewport" content="width=device-width, initial-scale=1">
+            <script type="importmap">
+            {
+              "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+              }
+            }
+            </script>
 	</head>
 	<body>
         <div id = 'content'>
@@ -44,21 +52,23 @@
             </ul>
         </div>
         <section id="ultimate">
-            <p id="ultimate-status">Click to throw</p>
-            <canvas id="ultimate-field" width="300" height="420"></canvas>
-            <div id="power-meter" aria-hidden="true">
-                <div id="power-track">
-                    <div id="power-good"></div>
-                    <div id="power-dial"></div>
-                </div>
-                <div id="power-labels">
-                    <span>short</span>
-                    <span>long</span>
+            <div id="ultimate-stage">
+                <canvas id="ultimate-field"></canvas>
+                <p id="ultimate-status">Click to throw</p>
+                <div id="power-meter" aria-hidden="true">
+                    <div id="power-track">
+                        <div id="power-good"></div>
+                        <div id="power-dial"></div>
+                    </div>
+                    <div id="power-labels">
+                        <span>short</span>
+                        <span>long</span>
+                    </div>
                 </div>
             </div>
             <p id="ultimate-streak"></p>
         </section>
         <script src="assets/js/ultimate-logic.js"></script>
-        <script src="assets/js/ultimate.js"></script>
+        <script type="module" src="assets/js/ultimate.js"></script>
 	</body>
 </html>

@@ -15,12 +15,44 @@
     var MAX_THROW = 150;
     var CATCH_RADIUS = 14;
     var POWER_SPEED = 0.85;
-    var THROW_DURATION = 0.55;
-    var RESULT_DURATION = 1.1;
+    var THROW_DURATION = 0.95;
+    var RESULT_DURATION = 1.15;
     var AIM_COOLDOWN = 0.4;
+    var CUT_SIDE_OFFSET = 26;
+    var CUT_DOWNFIELD_OFFSET = 18;
 
     function copyPoint(point) {
         return { x: point.x, y: point.y };
+    }
+
+    function lerpPoint(a, b, t) {
+        return {
+            x: a.x + (b.x - a.x) * t,
+            y: a.y + (b.y - a.y) * t
+        };
+    }
+
+    function cutStart(game) {
+        var dir = throwDirection(game);
+        var side = game.cutSide || 1;
+        return {
+            x: game.receiver.x + side * CUT_SIDE_OFFSET,
+            y: game.receiver.y + dir * CUT_DOWNFIELD_OFFSET
+        };
+    }
+
+    function receiverVisual(game) {
+        var start = cutStart(game);
+        var end = game.receiver;
+        if (game.state === "throwing") {
+            var t = Math.min(1, Math.max(0, game.throwT));
+            var eased = t * t * (3 - 2 * t);
+            return lerpPoint(start, end, eased);
+        }
+        if (game.state === "result") {
+            return copyPoint(end);
+        }
+        return copyPoint(start);
     }
 
     function throwDirection(game) {
@@ -98,7 +130,8 @@
             result: null,
             resultT: 0,
             streak: 0,
-            aimCooldown: 0
+            aimCooldown: 0,
+            cutSide: 1
         };
     }
 
@@ -179,6 +212,7 @@
         game.result = null;
         game.resultT = 0;
         game.aimCooldown = AIM_COOLDOWN;
+        game.cutSide = -(game.cutSide || 1);
         game.state = "aiming";
     }
 
@@ -197,6 +231,7 @@
         game.resultT = next.resultT;
         game.streak = 0;
         game.aimCooldown = AIM_COOLDOWN;
+        game.cutSide = 1;
     }
 
     function updateResult(game, dt) {
@@ -229,6 +264,8 @@
         THROW_DURATION: THROW_DURATION,
         RESULT_DURATION: RESULT_DURATION,
         AIM_COOLDOWN: AIM_COOLDOWN,
+        CUT_SIDE_OFFSET: CUT_SIDE_OFFSET,
+        CUT_DOWNFIELD_OFFSET: CUT_DOWNFIELD_OFFSET,
         createGame: createGame,
         update: update,
         startThrow: startThrow,
@@ -238,6 +275,8 @@
         statusText: statusText,
         throwDirection: throwDirection,
         continueFromCatch: continueFromCatch,
-        restart: restart
+        restart: restart,
+        cutStart: cutStart,
+        receiverVisual: receiverVisual
     };
 });

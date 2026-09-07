@@ -106,27 +106,42 @@ p {
 
 #ultimate {
     margin: 48px auto 80px;
-    max-width: 320px;
+    max-width: 560px;
+    width: 90%;
     text-align: center;
     user-select: none;
     animation: fade-in 1.5s;
     cursor: pointer;
 }
 
+#ultimate-stage {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #222;
+    background: #8fb56a;
+    aspect-ratio: 5 / 4;
+}
+
 #ultimate-field {
     display: block;
     width: 100%;
-    height: auto;
-    background: #7aa35a;
+    height: 100%;
     cursor: pointer;
     touch-action: manipulation;
 }
 
 #ultimate-status {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
     display: block;
-    margin: 0 0 12px;
+    margin: 0;
     font-size: 16px;
     min-height: 1.4em;
+    color: #111;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.55);
+    pointer-events: none;
 }
 
 #ultimate-streak {
@@ -137,13 +152,16 @@ p {
 }
 
 #power-meter {
-    margin-top: 12px;
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 12px;
 }
 
 #power-track {
     position: relative;
     height: 16px;
-    background: #ddd;
+    background: rgba(255,255,255,0.72);
     border: 1px solid #222;
 }
 
@@ -197,7 +215,7 @@ p {
 
     #ultimate {
         max-width: 90%;
-        width: 420px;
+        width: 560px;
     }
 
     #ultimate-status,

@@ -91,4 +91,17 @@ assert.strictEqual(logic.startThrow(reverseShort), true);
 step(reverseShort, logic.THROW_DURATION + 0.001);
 assert.strictEqual(reverseShort.result, "short");
 
+var cutGame = logic.createGame();
+var startCut = logic.cutStart(cutGame);
+assert.ok(startCut.x !== cutGame.receiver.x);
+assert.ok(startCut.y < cutGame.receiver.y);
+var idlePos = logic.receiverVisual(cutGame);
+assert.strictEqual(idlePos.x, startCut.x);
+assert.strictEqual(idlePos.y, startCut.y);
+cutGame.state = "throwing";
+cutGame.throwT = 1;
+var arrived = logic.receiverVisual(cutGame);
+assert.strictEqual(arrived.x, cutGame.receiver.x);
+assert.strictEqual(arrived.y, cutGame.receiver.y);
+
 console.log("ultimate-logic tests passed");
