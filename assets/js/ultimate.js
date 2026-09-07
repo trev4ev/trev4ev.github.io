@@ -480,7 +480,18 @@ function placeActors(elapsed) {
     }
 }
 
-function updateCamera(dt) {
+const cloudRigs = [
+    { x: -22, y: 16, z: -28 },
+    { x: 20, y: 15, z: -36 },
+    { x: 6, y: 18, z: 12 }
+];
+
+function placeClouds() {
+    clouds.forEach(function (cloud, i) {
+        const rig = cloudRigs[i];
+        cloud.position.set(cameraPos.x + rig.x, rig.y, cameraPos.z + rig.z);
+    });
+}
     const caught = game.state === "result" && game.result === "caught";
     const rate = caught ? 0.0000008 : 0.0018;
     const ease = 1 - Math.pow(rate, dt);
@@ -521,10 +532,6 @@ function recycleCatcherAsThrower(catcherX, catcherY) {
     desiredCam.z += dz;
     desiredLook.x += dx;
     desiredLook.z += dz;
-    clouds.forEach(function (cloud) {
-        cloud.position.x += dx;
-        cloud.position.z += dz;
-    });
     const previousThrower = throwerMesh;
     throwerMesh = receiverMesh;
     receiverMesh = previousThrower;
