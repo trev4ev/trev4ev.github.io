@@ -34,7 +34,7 @@ body {
     animation: fade-in 1.5s;
     text-align: left;
     width: auto;
-    max-width: 42vw;
+    max-width: min(28rem, 32vw);
     pointer-events: auto;
 }
 
@@ -181,9 +181,9 @@ p {
 
 @media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
     #content {
-        top: 25vh;
-        left: 25vw;
-        max-width: 55vw;
+        top: 22vh;
+        left: 18vw;
+        max-width: 58vw;
     }
 
     li, p, a, ul {

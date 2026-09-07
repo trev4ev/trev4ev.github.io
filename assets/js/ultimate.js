@@ -254,27 +254,35 @@ disc.add(discRim);
 disc.add(discStar);
 scene.add(disc);
 
-const METER_LENGTH = 7.2;
-const METER_WIDTH = 0.42;
-const METER_SIDE = 3.6;
-const CAM_SIDE = -5.4;
+const METER_LENGTH = 6.4;
+const METER_WIDTH = 0.58;
+const METER_GAP = 1.4;
+const CAM_SIDE = -6.8;
+const LOOK_X = -3.1;
+
+const meterTray = new THREE.Mesh(
+    new THREE.BoxGeometry(METER_LENGTH + 0.3, 0.04, METER_WIDTH + 0.3),
+    noOutline(glossy(0xc9b6e4, { shininess: 8 }))
+);
+meterTray.receiveShadow = true;
+scene.add(meterTray);
 
 const meterTrack = new THREE.Mesh(
-    new THREE.BoxGeometry(METER_WIDTH, 0.07, METER_LENGTH),
-    noOutline(glossy(0xffffff, { shininess: 20 }))
+    new THREE.BoxGeometry(METER_LENGTH, 0.05, METER_WIDTH),
+    noOutline(glossy(0xffffff, { shininess: 18 }))
 );
 meterTrack.receiveShadow = true;
 scene.add(meterTrack);
 
 const meterGood = new THREE.Mesh(
-    new THREE.BoxGeometry(METER_WIDTH * 1.12, 0.09, 1),
-    noOutline(glossy(0xd8c4f2, { emissive: 0xc9b6e4, emissiveIntensity: 0.22 }))
+    new THREE.BoxGeometry(1, 0.07, METER_WIDTH * 0.78),
+    noOutline(glossy(0xd8c4f2, { emissive: 0xc9b6e4, emissiveIntensity: 0.28 }))
 );
 scene.add(meterGood);
 
 const meterDial = new THREE.Mesh(
-    new THREE.BoxGeometry(METER_WIDTH * 1.45, 0.16, 0.32),
-    glossy(0xb892de, { emissive: 0x9b74d0, emissiveIntensity: 0.18 })
+    new THREE.BoxGeometry(0.28, 0.22, METER_WIDTH * 1.28),
+    glossy(0xb892de, { emissive: 0x9b74d0, emissiveIntensity: 0.22 })
 );
 meterDial.castShadow = true;
 scene.add(meterDial);
@@ -359,7 +367,7 @@ function placeActors(elapsed) {
     const bob = game.state === "aiming" ? Math.sin(elapsed * 2.4) * 0.08 : 0;
     const runBob = game.state === "throwing" ? Math.abs(Math.sin(elapsed * 10)) * 0.16 : 0;
     const flight = Math.max(0, Math.min(1, game.throwT || 0));
-    let discLift = 1.55;
+    let discLift = 1.78;
     if (game.state === "throwing") {
         discLift = 1.7 + Math.sin(flight * Math.PI) * 8.5;
     } else if (game.state === "result") {
@@ -435,25 +443,27 @@ function placeActors(elapsed) {
 
     const aiming = game.state === "aiming";
     const range = logic.goodPowerRange(game);
-    const meterX = Math.max(discWorld.x, throwerWorld.x) + METER_SIDE;
-    const meterStartZ = throwerWorld.z;
-    const meterEndZ = throwerWorld.z + dir * METER_LENGTH;
+    const meterStartX = Math.max(discWorld.x, throwerWorld.x) + METER_GAP;
+    const meterMidX = meterStartX + METER_LENGTH / 2;
+    const meterZ = throwerWorld.z + dir * 0.85;
+    meterTray.visible = aiming;
     meterTrack.visible = aiming;
     meterGood.visible = aiming;
     meterDial.visible = aiming;
     if (aiming) {
-        meterTrack.position.set(meterX, 0.04, (meterStartZ + meterEndZ) / 2);
+        meterTray.position.set(meterMidX, 0.02, meterZ);
+        meterTrack.position.set(meterMidX, 0.05, meterZ);
         const goodLen = Math.max(0.2, (range.max - range.min) * METER_LENGTH);
-        meterGood.scale.z = goodLen;
+        meterGood.scale.x = goodLen;
         meterGood.position.set(
-            meterX,
-            0.055,
-            meterStartZ + dir * ((range.min + range.max) / 2) * METER_LENGTH
+            meterStartX + ((range.min + range.max) / 2) * METER_LENGTH,
+            0.075,
+            meterZ
         );
         meterDial.position.set(
-            meterX,
-            0.12,
-            meterStartZ + dir * game.power * METER_LENGTH
+            meterStartX + game.power * METER_LENGTH,
+            0.16,
+            meterZ
         );
     }
 
@@ -473,7 +483,7 @@ function placeActors(elapsed) {
     const back = -dir * 20;
     if (caught) {
         desiredCam.set(receiverWorld.x + CAM_SIDE, 6.2, receiverWorld.z + back);
-        desiredLook.set(receiverWorld.x, 1.4, receiverWorld.z + dir * 12);
+        desiredLook.set(receiverWorld.x + LOOK_X, 1.4, receiverWorld.z + dir * 12);
     } else if (game.state === "throwing") {
         const follow = 0.2 + Math.min(1, game.throwT) * 0.55;
         interest.copy(throwerWorld).lerp(discWorld, follow);
@@ -484,6 +494,7 @@ function placeActors(elapsed) {
         );
         desiredLook.copy(discWorld);
         desiredLook.y += 0.6;
+        desiredLook.x = throwerWorld.x + LOOK_X;
         desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.18);
         if (game.throwT > 0.62) {
             const settle = Math.min(1, (game.throwT - 0.62) / 0.38);
@@ -494,7 +505,7 @@ function placeActors(elapsed) {
                 (interest.z + back) * (1 - eased) + (receiverWorld.z + back) * eased
             );
             desiredLook.set(
-                receiverWorld.x,
+                receiverWorld.x + LOOK_X,
                 1.4,
                 receiverWorld.z + dir * 12
             );
@@ -503,7 +514,7 @@ function placeActors(elapsed) {
         desiredCam.set(throwerWorld.x + CAM_SIDE, 6.2, throwerWorld.z + back);
         desiredLook.copy(discWorld);
         desiredLook.y += 0.5;
-        desiredLook.x = throwerWorld.x + 1.6;
+        desiredLook.x = throwerWorld.x + LOOK_X;
         desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.22);
     }
 }
