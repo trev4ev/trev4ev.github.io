@@ -263,6 +263,7 @@ const CAM_SIDE = -6.8;
 const LOOK_X = -3.1;
 let camSide = CAM_SIDE;
 let lookX = LOOK_X;
+let camBack = 20;
 
 const meterGroup = new THREE.Group();
 scene.add(meterGroup);
@@ -487,7 +488,7 @@ function placeActors(elapsed) {
     ground.position.x = anchor.x;
     ground.position.z = anchor.z;
 
-    const back = -dir * 20;
+    const back = -dir * camBack;
     if (caught) {
         desiredCam.set(receiverWorld.x + camSide, 6.2, receiverWorld.z + back);
         desiredLook.set(receiverWorld.x + lookX, 1.4, receiverWorld.z + dir * 12);
@@ -556,15 +557,23 @@ function resize() {
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     const portrait = width / height < 0.78;
-    camSide = portrait ? -5.1 : CAM_SIDE;
-    lookX = portrait ? -1.4 : LOOK_X;
-    camera.fov = portrait ? 46 : 42;
+    camSide = portrait ? 0 : CAM_SIDE;
+    lookX = portrait ? 0 : LOOK_X;
+    camBack = portrait ? 23 : 20;
+    camera.fov = portrait ? 50 : 42;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
     canvas.style.width = "100%";
     canvas.style.height = "100%";
     outline.setSize(width, height);
+    if (elapsed) {
+        placeActors(elapsed);
+        cameraPos.copy(desiredCam);
+        cameraLook.copy(desiredLook);
+        camera.position.copy(cameraPos);
+        camera.lookAt(cameraLook);
+    }
 }
 
 let lastTime = 0;
