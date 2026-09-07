@@ -18,8 +18,8 @@
     var THROW_DURATION = 0.95;
     var RESULT_DURATION = 1.15;
     var AIM_COOLDOWN = 0.4;
-    var CUT_SIDE_OFFSET = 26;
-    var CUT_DOWNFIELD_OFFSET = 18;
+    var CUT_SIDE_OFFSET = 38;
+    var CUT_DOWNFIELD_OFFSET = 20;
 
     function copyPoint(point) {
         return { x: point.x, y: point.y };

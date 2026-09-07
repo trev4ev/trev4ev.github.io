@@ -22,7 +22,7 @@ window.ultimateGame = game;
 const scene = new THREE.Scene();
 const sky = 0xb9d4ea;
 scene.background = new THREE.Color(sky);
-scene.fog = new THREE.Fog(sky, 28, 95);
+scene.fog = new THREE.Fog(sky, 70, 180);
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
 const cameraPos = new THREE.Vector3(0, 8, 28);
@@ -40,8 +40,8 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const outline = new OutlineEffect(renderer, {
-    defaultThickness: 0.0075,
-    defaultColor: [0.05, 0.05, 0.08],
+    defaultThickness: 0.011,
+    defaultColor: [0.04, 0.04, 0.06],
     defaultAlpha: 1
 });
 
@@ -51,7 +51,10 @@ function noOutline(material) {
 }
 
 function toon(color) {
-    return new THREE.MeshToonMaterial({ color: color });
+    return new THREE.MeshLambertMaterial({
+        color: color,
+        emissive: new THREE.Color(color).multiplyScalar(0.12)
+    });
 }
 
 const hemi = new THREE.HemisphereLight(0xf2f6ff, 0x6d8a4e, 1.15);
@@ -117,13 +120,13 @@ scene.add(catchRing);
 function makePlayer(color) {
     const group = new THREE.Group();
     const body = new THREE.Mesh(
-        new THREE.CapsuleGeometry(0.55, 1.7, 4, 12),
+        new THREE.CapsuleGeometry(0.62, 1.9, 4, 12),
         toon(color)
     );
-    body.position.y = 1.55;
+    body.position.y = 1.7;
     body.castShadow = true;
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.46, 16, 12), toon(color));
-    head.position.y = 2.85;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 12), toon(color));
+    head.position.y = 3.05;
     head.castShadow = true;
     group.add(body);
     group.add(head);
@@ -131,8 +134,8 @@ function makePlayer(color) {
     return group;
 }
 
-const throwerMesh = makePlayer(0x2c4a7c);
-const receiverMesh = makePlayer(0xc45c26);
+const throwerMesh = makePlayer(0x3b6cc4);
+const receiverMesh = makePlayer(0xe06728);
 scene.add(throwerMesh);
 scene.add(receiverMesh);
 
@@ -205,7 +208,17 @@ function placeActors(elapsed) {
 
     throwerWorld.copy(fieldToWorld(game.thrower.x, game.thrower.y, 0));
     receiverWorld.copy(fieldToWorld(receiverPos.x, receiverPos.y, 0));
-    discWorld.copy(fieldToWorld(game.disc.x, game.disc.y, catchLift));
+
+    let discField = { x: game.disc.x, y: game.disc.y };
+    let discHeight = catchLift;
+    if (game.state === "aiming") {
+        discField = {
+            x: game.thrower.x,
+            y: game.thrower.y + dir * 3.2
+        };
+        discHeight = 1.35;
+    }
+    discWorld.copy(fieldToWorld(discField.x, discField.y, discHeight));
 
     throwerMesh.position.copy(throwerWorld);
     throwerMesh.position.y = bob;
@@ -251,16 +264,16 @@ function placeActors(elapsed) {
         : game.state === "result" ? 0.28
         : 0;
     const interest = throwerWorld.clone().lerp(discWorld, follow);
-    const back = -dir * 21;
+    const back = -dir * 24;
     desiredCam.set(
-        interest.x * 0.35,
-        7.6 + game.disc.height * 1.8,
+        throwerWorld.x * 0.15,
+        8.6 + game.disc.height * 1.3,
         interest.z + back
     );
     desiredLook.set(
-        THREE.MathUtils.lerp(discWorld.x, receiverWorld.x, 0.45),
-        1.8 + game.disc.height * 1.2,
-        THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.28)
+        catchPoint.x * 0.15 + discWorld.x * 0.2,
+        1.5 + game.disc.height * 1.05,
+        THREE.MathUtils.lerp(throwerWorld.z, catchPoint.z, 0.55)
     );
 }
 
@@ -314,6 +327,10 @@ function tryThrow(event) {
 resize();
 updateMeter();
 placeActors(0);
+cameraPos.copy(desiredCam);
+cameraLook.copy(desiredLook);
+camera.position.copy(cameraPos);
+camera.lookAt(cameraLook);
 root.addEventListener("pointerdown", tryThrow);
 window.addEventListener("resize", resize);
 if (window.ResizeObserver) {
