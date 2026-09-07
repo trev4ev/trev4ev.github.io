@@ -14,8 +14,8 @@ if (!canvas || !logic) {
 }
 
 const UNIT = 0.42;
-const PLAYER_HEIGHT = 3.2;
-const DISC_RADIUS = 0.95;
+const DISC_RADIUS = 1.7;
+const DISC_HOLD_SIDE = 9;
 const game = logic.createGame();
 window.ultimateGame = game;
 
@@ -139,11 +139,20 @@ const receiverMesh = makePlayer(0xe06728);
 scene.add(throwerMesh);
 scene.add(receiverMesh);
 
-const disc = new THREE.Mesh(
-    new THREE.CylinderGeometry(DISC_RADIUS, DISC_RADIUS, 0.14, 32),
-    toon(0xf3f3f3)
+const disc = new THREE.Group();
+const discPlate = new THREE.Mesh(
+    new THREE.CylinderGeometry(DISC_RADIUS, DISC_RADIUS, 0.28, 40),
+    toon(0xfff6d8)
 );
-disc.castShadow = true;
+discPlate.castShadow = true;
+const discRim = new THREE.Mesh(
+    new THREE.TorusGeometry(DISC_RADIUS, 0.2, 10, 40),
+    toon(0xe06728)
+);
+discRim.rotation.x = Math.PI / 2;
+discRim.castShadow = true;
+disc.add(discPlate);
+disc.add(discRim);
 scene.add(disc);
 
 function blobShadow() {
@@ -203,22 +212,28 @@ function placeActors(elapsed) {
     const receiverPos = logic.receiverVisual(game);
     const dir = logic.throwDirection(game);
     const bob = game.state === "aiming" ? Math.sin(elapsed * 3) * 0.05 : 0;
-    const discLift = 0.28 + game.disc.height * 6.2;
-    const catchLift = game.state === "result" && game.result === "caught" ? 2.15 : discLift;
+    const flight = Math.max(0, Math.min(1, game.throwT || 0));
+    let discLift = 1.9;
+    if (game.state === "throwing") {
+        discLift = 2.1 + Math.sin(flight * Math.PI) * 8.5;
+    } else if (game.state === "result") {
+        discLift = game.result === "caught" ? 2.3 : 0.35;
+    }
 
     throwerWorld.copy(fieldToWorld(game.thrower.x, game.thrower.y, 0));
     receiverWorld.copy(fieldToWorld(receiverPos.x, receiverPos.y, 0));
 
-    let discField = { x: game.disc.x, y: game.disc.y };
-    let discHeight = catchLift;
+    let holdSide = 0;
     if (game.state === "aiming") {
-        discField = {
-            x: game.thrower.x,
-            y: game.thrower.y + dir * 3.2
-        };
-        discHeight = 1.35;
+        holdSide = DISC_HOLD_SIDE;
+    } else if (game.state === "throwing") {
+        holdSide = DISC_HOLD_SIDE * (1 - flight);
     }
-    discWorld.copy(fieldToWorld(discField.x, discField.y, discHeight));
+    const discField = {
+        x: (game.state === "aiming" ? game.thrower.x : game.disc.x) + holdSide,
+        y: game.state === "aiming" ? game.thrower.y + dir * 2.2 : game.disc.y
+    };
+    discWorld.copy(fieldToWorld(discField.x, discField.y, discLift));
 
     throwerMesh.position.copy(throwerWorld);
     throwerMesh.position.y = bob;
@@ -239,14 +254,15 @@ function placeActors(elapsed) {
 
     disc.position.copy(discWorld);
     if (game.state === "throwing") {
-        disc.rotation.x = 0.35;
-        disc.rotation.y += 0.45;
+        disc.rotation.x = 0.55;
+        disc.rotation.z = 0.2;
+        disc.rotation.y += 0.35;
     } else if (game.state === "result" && game.result === "caught") {
-        disc.rotation.x = 0;
-        disc.position.y = 2.15;
+        disc.rotation.set(0.15, disc.rotation.y, 0);
+        disc.position.y = 2.3;
     } else {
-        disc.rotation.x = 0;
-        disc.rotation.y *= 0.85;
+        disc.rotation.x = 0.2;
+        disc.rotation.z = 0.05;
     }
 
     const catchPoint = fieldToWorld(game.receiver.x, game.receiver.y, 0.06);
@@ -260,21 +276,19 @@ function placeActors(elapsed) {
     discShadow.scale.set(shadowScale, shadowScale, shadowScale);
     discShadow.material.opacity = 0.2 - game.disc.height * 0.08;
 
-    const follow = game.state === "throwing" ? Math.min(1, game.throwT) * 0.42
-        : game.state === "result" ? 0.28
-        : 0;
+    const follow = game.state === "throwing" ? 0.2 + Math.min(1, game.throwT) * 0.55
+        : game.state === "result" ? 0.45
+        : 0.08;
     const interest = throwerWorld.clone().lerp(discWorld, follow);
-    const back = -dir * 24;
+    const back = -dir * 18;
     desiredCam.set(
-        throwerWorld.x * 0.15,
-        8.6 + game.disc.height * 1.3,
+        throwerWorld.x + 6.2,
+        5.8 + (game.state === "throwing" ? game.disc.height * 3.2 : 0),
         interest.z + back
     );
-    desiredLook.set(
-        catchPoint.x * 0.15 + discWorld.x * 0.2,
-        1.5 + game.disc.height * 1.05,
-        THREE.MathUtils.lerp(throwerWorld.z, catchPoint.z, 0.55)
-    );
+    desiredLook.copy(discWorld);
+    desiredLook.y += 0.6;
+    desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.18);
 }
 
 function updateCamera(dt) {
