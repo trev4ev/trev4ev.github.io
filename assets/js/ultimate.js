@@ -256,11 +256,13 @@ scene.add(disc);
 
 const METER_LENGTH = 3.4;
 const METER_WIDTH = 0.34;
-const METER_BACK = 2.5;
-const METER_RIGHT = 0.85;
-const METER_YAW = 0.88;
+const METER_BACK = 1.15;
+const METER_RIGHT = 0.28;
+const METER_YAW = 0.42;
 const CAM_SIDE = -6.8;
 const LOOK_X = -3.1;
+let camSide = CAM_SIDE;
+let lookX = LOOK_X;
 
 const meterGroup = new THREE.Group();
 scene.add(meterGroup);
@@ -487,39 +489,39 @@ function placeActors(elapsed) {
 
     const back = -dir * 20;
     if (caught) {
-        desiredCam.set(receiverWorld.x + CAM_SIDE, 6.2, receiverWorld.z + back);
-        desiredLook.set(receiverWorld.x + LOOK_X, 1.4, receiverWorld.z + dir * 12);
+        desiredCam.set(receiverWorld.x + camSide, 6.2, receiverWorld.z + back);
+        desiredLook.set(receiverWorld.x + lookX, 1.4, receiverWorld.z + dir * 12);
     } else if (game.state === "throwing") {
         const follow = 0.2 + Math.min(1, game.throwT) * 0.55;
         interest.copy(throwerWorld).lerp(discWorld, follow);
         desiredCam.set(
-            throwerWorld.x + CAM_SIDE,
+            throwerWorld.x + camSide,
             6.2 + game.disc.height * 3.2,
             interest.z + back
         );
         desiredLook.copy(discWorld);
         desiredLook.y += 0.6;
-        desiredLook.x = throwerWorld.x + LOOK_X;
+        desiredLook.x = throwerWorld.x + lookX;
         desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.18);
         if (game.throwT > 0.62) {
             const settle = Math.min(1, (game.throwT - 0.62) / 0.38);
             const eased = settle * settle * (3 - 2 * settle);
             desiredCam.set(
-                throwerWorld.x + CAM_SIDE * (1 - eased) + (receiverWorld.x + CAM_SIDE) * eased,
+                throwerWorld.x + camSide * (1 - eased) + (receiverWorld.x + camSide) * eased,
                 6.2 + game.disc.height * 3.2 * (1 - eased),
                 (interest.z + back) * (1 - eased) + (receiverWorld.z + back) * eased
             );
             desiredLook.set(
-                receiverWorld.x + LOOK_X,
+                receiverWorld.x + lookX,
                 1.4,
                 receiverWorld.z + dir * 12
             );
         }
     } else {
-        desiredCam.set(throwerWorld.x + CAM_SIDE, 6.2, throwerWorld.z + back);
+        desiredCam.set(throwerWorld.x + camSide, 6.2, throwerWorld.z + back);
         desiredLook.copy(discWorld);
         desiredLook.y += 0.5;
-        desiredLook.x = throwerWorld.x + LOOK_X;
+        desiredLook.x = throwerWorld.x + lookX;
         desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.22);
     }
 }
@@ -553,6 +555,10 @@ function resize() {
     const rect = stage ? stage.getBoundingClientRect() : canvas.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
+    const portrait = width / height < 0.78;
+    camSide = portrait ? -5.1 : CAM_SIDE;
+    lookX = portrait ? -1.4 : LOOK_X;
+    camera.fov = portrait ? 46 : 42;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
