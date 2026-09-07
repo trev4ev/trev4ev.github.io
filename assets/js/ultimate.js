@@ -13,6 +13,7 @@
 
     var ctx = canvas.getContext("2d");
     var game = logic.createGame();
+    window.ultimateGame = game;
     var lastTime = 0;
     var logicalWidth = 300;
     var logicalHeight = 420;
@@ -124,8 +125,9 @@
         if (event.target.closest && event.target.closest("a")) {
             return;
         }
-        event.preventDefault();
-        logic.startThrow(game);
+        if (logic.startThrow(game)) {
+            event.preventDefault();
+        }
     }
 
     resize();

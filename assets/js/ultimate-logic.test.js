@@ -62,6 +62,14 @@ assert.strictEqual(bounce.powerDir, -1);
 
 assert.strictEqual(logic.startThrow(throwWithPower(0.2)), false);
 
+var cooling = logic.createGame();
+cooling.aimCooldown = logic.AIM_COOLDOWN;
+cooling.power = 0.5;
+assert.strictEqual(logic.startThrow(cooling), false);
+step(cooling, logic.AIM_COOLDOWN + 0.01);
+cooling.power = 0.5;
+assert.strictEqual(logic.startThrow(cooling), true);
+
 var edges = logic.createGame();
 assert.strictEqual(logic.judgeLanding(edges, logic.landingForPower(edges, range.min)), "caught");
 assert.strictEqual(logic.judgeLanding(edges, logic.landingForPower(edges, range.max)), "caught");
@@ -69,7 +77,7 @@ assert.strictEqual(logic.judgeLanding(edges, logic.landingForPower(edges, Math.m
 assert.strictEqual(logic.judgeLanding(edges, logic.landingForPower(edges, Math.min(1, range.max + 0.05))), "long");
 
 var reverse = throwWithPower(perfect);
-step(reverse, logic.RESULT_DURATION + 0.02);
+step(reverse, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
 assert.strictEqual(reverse.thrower.y, logic.RECEIVER_START.y);
 reverse.power = (logic.goodPowerRange(reverse).min + logic.goodPowerRange(reverse).max) / 2;
 assert.strictEqual(logic.startThrow(reverse), true);
@@ -77,9 +85,9 @@ step(reverse, logic.THROW_DURATION + 0.001);
 assert.strictEqual(reverse.result, "caught");
 
 var reverseShort = throwWithPower(perfect);
-step(reverseShort, logic.RESULT_DURATION + 0.02);
+step(reverseShort, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
 reverseShort.power = 0.1;
-logic.startThrow(reverseShort);
+assert.strictEqual(logic.startThrow(reverseShort), true);
 step(reverseShort, logic.THROW_DURATION + 0.001);
 assert.strictEqual(reverseShort.result, "short");
 

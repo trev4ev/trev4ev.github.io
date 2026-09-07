@@ -14,9 +14,10 @@
     var RECEIVER_START = { x: 50, y: 32 };
     var MAX_THROW = 150;
     var CATCH_RADIUS = 14;
-    var POWER_SPEED = 1.25;
+    var POWER_SPEED = 0.85;
     var THROW_DURATION = 0.55;
-    var RESULT_DURATION = 0.9;
+    var RESULT_DURATION = 1.1;
+    var AIM_COOLDOWN = 0.4;
 
     function copyPoint(point) {
         return { x: point.x, y: point.y };
@@ -65,16 +66,16 @@
 
     function statusText(game) {
         if (game.state === "throwing") {
-            return "Throwing…";
+            return "Throwing...";
         }
         if (game.state === "result") {
             if (game.result === "caught") {
                 return "Caught!";
             }
             if (game.result === "short") {
-                return "Too short — turnover";
+                return "Too short \u2014 turnover";
             }
-            return "Too long — turnover";
+            return "Too long \u2014 turnover";
         }
         return "Click to throw";
     }
@@ -96,13 +97,17 @@
             throwT: 0,
             result: null,
             resultT: 0,
-            streak: 0
+            streak: 0,
+            aimCooldown: 0
         };
     }
 
     function updateAiming(game, dt) {
         if (game.state !== "aiming") {
             return;
+        }
+        if (game.aimCooldown > 0) {
+            game.aimCooldown -= dt;
         }
         game.power += game.powerDir * POWER_SPEED * dt;
         if (game.power >= 1) {
@@ -115,7 +120,7 @@
     }
 
     function startThrow(game) {
-        if (game.state !== "aiming") {
+        if (game.state !== "aiming" || game.aimCooldown > 0) {
             return false;
         }
         game.lockedPower = game.power;
@@ -173,6 +178,7 @@
         game.throwT = 0;
         game.result = null;
         game.resultT = 0;
+        game.aimCooldown = AIM_COOLDOWN;
         game.state = "aiming";
     }
 
@@ -190,6 +196,7 @@
         game.result = next.result;
         game.resultT = next.resultT;
         game.streak = 0;
+        game.aimCooldown = AIM_COOLDOWN;
     }
 
     function updateResult(game, dt) {
@@ -221,6 +228,7 @@
         POWER_SPEED: POWER_SPEED,
         THROW_DURATION: THROW_DURATION,
         RESULT_DURATION: RESULT_DURATION,
+        AIM_COOLDOWN: AIM_COOLDOWN,
         createGame: createGame,
         update: update,
         startThrow: startThrow,
