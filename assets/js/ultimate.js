@@ -458,6 +458,20 @@ function placeActors(elapsed) {
         desiredLook.copy(discWorld);
         desiredLook.y += 0.6;
         desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.18);
+        if (game.throwT > 0.62) {
+            const settle = Math.min(1, (game.throwT - 0.62) / 0.38);
+            const eased = settle * settle * (3 - 2 * settle);
+            desiredCam.set(
+                throwerWorld.x + 6.2 * (1 - eased) + (receiverWorld.x + 6.2) * eased,
+                5.8 + game.disc.height * 3.2 * (1 - eased),
+                (interest.z + back) * (1 - eased) + (receiverWorld.z + back) * eased
+            );
+            desiredLook.set(
+                receiverWorld.x,
+                1.4,
+                receiverWorld.z + dir * 12
+            );
+        }
     } else {
         desiredCam.set(throwerWorld.x + 6.2, 5.8, throwerWorld.z + back);
         desiredLook.copy(discWorld);
