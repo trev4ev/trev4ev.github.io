@@ -55,20 +55,24 @@ a {
     pointer-events: auto;
 }
 
-#stripe:after {
+#decagon:after {
     background: #e4d8f4;
 }
 
-#codebase:after {
+#figma:after {
     background: #d4c0ea;
 }
 
-#ethical:after {
+#janestreet:after {
     background: #c9b6e4;
 }
 
-#ugmo:after {
+#stripe:after {
     background: #b892de;
+}
+
+#abbq:after {
+    background: #a57ad4;
 }
 
 a:after, #name:after {
