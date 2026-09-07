@@ -300,11 +300,15 @@ function updateCamera(dt) {
 }
 
 function resize() {
-    const width = Math.max(1, canvas.clientWidth || 560);
-    const height = Math.max(1, canvas.clientHeight || 400);
+    const stage = canvas.parentElement;
+    const rect = stage ? stage.getBoundingClientRect() : canvas.getBoundingClientRect();
+    const width = Math.max(1, Math.round(rect.width));
+    const height = Math.max(1, Math.round(rect.height));
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
     outline.setSize(width, height);
 }
 
@@ -348,6 +352,6 @@ camera.lookAt(cameraLook);
 root.addEventListener("pointerdown", tryThrow);
 window.addEventListener("resize", resize);
 if (window.ResizeObserver) {
-    new ResizeObserver(resize).observe(canvas);
+    new ResizeObserver(resize).observe(canvas.parentElement || canvas);
 }
 requestAnimationFrame(frame);
