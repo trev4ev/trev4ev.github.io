@@ -126,10 +126,11 @@ p {
 #ultimate-stage {
     position: relative;
     overflow: hidden;
-    border: 3px solid var(--lilac-line);
-    background: #d4c4f0;
+    border: 3px solid #e4b7d8;
+    border-radius: 28px;
+    background: #ffe8f4;
     aspect-ratio: 5 / 4;
-    image-rendering: pixelated;
+    box-shadow: 0 16px 36px rgba(180, 110, 160, 0.18);
 }
 
 #ultimate-field {
@@ -144,25 +145,28 @@ p {
 
 #ultimate-status {
     position: absolute;
-    top: 12px;
+    top: 14px;
     left: 0;
     right: 0;
     display: block;
     margin: 0;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
-    line-height: 1.6;
+    font-family: Nunito, 'Noto Sans', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.4;
     min-height: 1.4em;
-    color: var(--lilac-deep);
-    text-shadow: 1px 1px 0 #fff;
+    color: #7a3d68;
+    text-shadow: 0 1px 0 #fff, 0 8px 16px rgba(255, 255, 255, 0.7);
     pointer-events: none;
 }
 
 #ultimate-streak {
     display: block;
-    margin: 10px 0 0;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
+    margin: 12px 0 0;
+    font-family: Nunito, 'Noto Sans', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: #7a3d68;
     min-height: 1.3em;
 }
 
@@ -175,33 +179,39 @@ p {
 
 #power-track {
     position: relative;
-    height: 14px;
-    background: #f4eaff;
-    border: 2px solid var(--lilac-line);
+    height: 16px;
+    background: #fff4fb;
+    border: 2px solid #e4b7d8;
+    border-radius: 999px;
 }
 
 #power-good {
     position: absolute;
     top: 0;
     height: 100%;
-    background: var(--gold);
+    background: #ffe27a;
 }
 
 #power-dial {
     position: absolute;
-    top: -4px;
-    width: 6px;
+    top: -3px;
+    width: 10px;
     height: 22px;
-    margin-left: -3px;
-    background: var(--lilac-deep);
+    margin-left: -5px;
+    background: #ff8eb8;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(122, 61, 104, 0.25);
 }
 
 #power-labels {
     display: flex;
     justify-content: space-between;
     margin-top: 6px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
+    font-family: Nunito, 'Noto Sans', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    color: #7a3d68;
 }
 
 @media (orientation: portrait){
@@ -235,11 +245,11 @@ p {
     }
 
     #ultimate-status {
-        font-size: 10px;
+        font-size: 20px;
     }
 
     #ultimate-streak,
     #power-labels {
-        font-size: 8px;
+        font-size: 14px;
     }
 }
