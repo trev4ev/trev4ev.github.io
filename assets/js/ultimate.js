@@ -258,41 +258,49 @@ const METER_LENGTH = 3.4;
 const METER_WIDTH = 0.34;
 const METER_BACK = 2.5;
 const METER_RIGHT = 0.85;
+const METER_YAW = 0.72;
 const CAM_SIDE = -6.8;
 const LOOK_X = -3.1;
+
+const meterGroup = new THREE.Group();
+scene.add(meterGroup);
 
 const meterTray = new THREE.Mesh(
     new THREE.BoxGeometry(METER_LENGTH + 0.3, 0.04, METER_WIDTH + 0.3),
     noOutline(glossy(0xc9b6e4, { shininess: 8 }))
 );
 meterTray.receiveShadow = true;
-scene.add(meterTray);
+meterTray.position.y = 0.02;
+meterGroup.add(meterTray);
 
 const meterTrack = new THREE.Mesh(
     new THREE.BoxGeometry(METER_LENGTH, 0.05, METER_WIDTH),
     noOutline(glossy(0xffffff, { shininess: 18 }))
 );
 meterTrack.receiveShadow = true;
-scene.add(meterTrack);
+meterTrack.position.y = 0.05;
+meterGroup.add(meterTrack);
 
 const meterGood = new THREE.Mesh(
     new THREE.BoxGeometry(1, 0.07, METER_WIDTH * 0.78),
     noOutline(glossy(0xd8c4f2, { emissive: 0xc9b6e4, emissiveIntensity: 0.28 }))
 );
-scene.add(meterGood);
+meterGood.position.y = 0.075;
+meterGroup.add(meterGood);
 
 const meterDial = new THREE.Mesh(
     new THREE.BoxGeometry(0.26, 0.1, METER_WIDTH * 1.35),
     glossy(0xb892de, { emissive: 0x9b74d0, emissiveIntensity: 0.28 })
 );
 meterDial.castShadow = true;
+meterDial.position.y = 0.08;
 const meterNeedle = new THREE.Mesh(
     new THREE.BoxGeometry(0.1, 0.52, 0.1),
     glossy(0xa57ad4, { emissive: 0x8d68c4, emissiveIntensity: 0.2 })
 );
 meterNeedle.position.y = 0.28;
 meterDial.add(meterNeedle);
-scene.add(meterDial);
+meterGroup.add(meterDial);
 
 function blobShadow() {
     const mesh = new THREE.Mesh(
@@ -450,28 +458,18 @@ function placeActors(elapsed) {
 
     const aiming = game.state === "aiming";
     const range = logic.goodPowerRange(game);
-    const meterStartX = throwerWorld.x + METER_RIGHT;
-    const meterMidX = meterStartX + METER_LENGTH / 2;
-    const meterZ = throwerWorld.z - dir * METER_BACK;
-    meterTray.visible = aiming;
-    meterTrack.visible = aiming;
-    meterGood.visible = aiming;
-    meterDial.visible = aiming;
+    meterGroup.visible = aiming;
     if (aiming) {
-        meterTray.position.set(meterMidX, 0.02, meterZ);
-        meterTrack.position.set(meterMidX, 0.05, meterZ);
+        meterGroup.position.set(
+            throwerWorld.x + METER_RIGHT + METER_LENGTH / 2,
+            0,
+            throwerWorld.z - dir * METER_BACK
+        );
+        meterGroup.rotation.y = -dir * METER_YAW;
         const goodLen = Math.max(0.2, (range.max - range.min) * METER_LENGTH);
         meterGood.scale.x = goodLen;
-        meterGood.position.set(
-            meterStartX + ((range.min + range.max) / 2) * METER_LENGTH,
-            0.075,
-            meterZ
-        );
-        meterDial.position.set(
-            meterStartX + game.power * METER_LENGTH,
-            0.08,
-            meterZ
-        );
+        meterGood.position.x = ((range.min + range.max) / 2 - 0.5) * METER_LENGTH;
+        meterDial.position.x = (game.power - 0.5) * METER_LENGTH;
     }
 
     if (throwerMesh.visible) {
