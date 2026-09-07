@@ -20,9 +20,9 @@ const game = logic.createGame();
 window.ultimateGame = game;
 
 const scene = new THREE.Scene();
-const sky = 0xb9d4ea;
+const sky = 0xd4c4f0;
 scene.background = new THREE.Color(sky);
-scene.fog = new THREE.Fog(sky, 70, 180);
+scene.fog = new THREE.Fog(sky, 55, 150);
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
 const cameraPos = new THREE.Vector3(0, 8, 28);
@@ -32,16 +32,16 @@ camera.lookAt(cameraLook);
 
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
-    antialias: true
+    antialias: false
 });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setPixelRatio(1);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.BasicShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const outline = new OutlineEffect(renderer, {
-    defaultThickness: 0.011,
-    defaultColor: [0.04, 0.04, 0.06],
+    defaultThickness: 0.014,
+    defaultColor: [0.23, 0.15, 0.32],
     defaultAlpha: 1
 });
 
@@ -57,13 +57,13 @@ function toon(color) {
     });
 }
 
-const hemi = new THREE.HemisphereLight(0xf2f6ff, 0x6d8a4e, 1.15);
+const hemi = new THREE.HemisphereLight(0xf4ecff, 0x7a6a9a, 1.2);
 scene.add(hemi);
 
-const sun = new THREE.DirectionalLight(0xfff4dd, 1.35);
+const sun = new THREE.DirectionalLight(0xfff2d6, 1.15);
 sun.position.set(18, 28, 12);
 sun.castShadow = true;
-sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.mapSize.set(512, 512);
 sun.shadow.camera.left = -40;
 sun.shadow.camera.right = 40;
 sun.shadow.camera.top = 40;
@@ -72,7 +72,7 @@ scene.add(sun);
 
 const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(220, 220),
-    noOutline(new THREE.MeshLambertMaterial({ color: 0x7aa35c }))
+    noOutline(new THREE.MeshLambertMaterial({ color: 0xc4b3de }))
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
@@ -80,79 +80,120 @@ scene.add(ground);
 
 const fieldWidth = logic.FIELD.width * UNIT;
 const fieldLength = logic.FIELD.height * UNIT;
-const field = new THREE.Mesh(
-    new THREE.PlaneGeometry(fieldWidth, fieldLength),
-    noOutline(new THREE.MeshLambertMaterial({ color: 0x6f9b4f }))
-);
-field.rotation.x = -Math.PI / 2;
-field.position.y = 0.02;
-field.receiveShadow = true;
-scene.add(field);
 
-const lineMat = toon(0xf4f4f4);
+function addVoxelField() {
+    const cols = 12;
+    const rows = 20;
+    const tileW = fieldWidth / cols;
+    const tileL = fieldLength / rows;
+    const geo = new THREE.BoxGeometry(tileW * 0.97, 0.18, tileL * 0.97);
+    const grassA = noOutline(toon(0x6faf62));
+    const grassB = noOutline(toon(0x5d9a52));
+    const endA = noOutline(toon(0xa88ad4));
+    const endB = noOutline(toon(0x8f6fc2));
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            const endzone = j < 3 || j >= rows - 3;
+            const mat = endzone
+                ? ((i + j) % 2 ? endA : endB)
+                : ((i + j) % 2 ? grassA : grassB);
+            const tile = new THREE.Mesh(geo, mat);
+            tile.position.set(
+                -fieldWidth / 2 + tileW * (i + 0.5),
+                0.09,
+                -fieldLength / 2 + tileL * (j + 0.5)
+            );
+            tile.receiveShadow = true;
+            scene.add(tile);
+        }
+    }
+}
+
+addVoxelField();
+
+const lineMat = toon(0xf7f0ff);
 function addStripe(width, length, x, z) {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, 0.08, length), lineMat);
-    mesh.position.set(x, 0.07, z);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, 0.22, length), lineMat);
+    mesh.position.set(x, 0.22, z);
+    mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
     return mesh;
 }
 
-addStripe(fieldWidth, 0.22, 0, -fieldLength / 2);
-addStripe(fieldWidth, 0.22, 0, fieldLength / 2);
-addStripe(0.22, fieldLength, -fieldWidth / 2, 0);
-addStripe(0.22, fieldLength, fieldWidth / 2, 0);
-addStripe(fieldWidth, 0.16, 0, 0);
+addStripe(fieldWidth + 0.4, 0.4, 0, -fieldLength / 2);
+addStripe(fieldWidth + 0.4, 0.4, 0, fieldLength / 2);
+addStripe(0.4, fieldLength, -fieldWidth / 2, 0);
+addStripe(0.4, fieldLength, fieldWidth / 2, 0);
+addStripe(fieldWidth, 0.32, 0, 0);
 
-const catchRing = new THREE.Mesh(
-    new THREE.RingGeometry(logic.CATCH_RADIUS * UNIT * 0.72, logic.CATCH_RADIUS * UNIT, 48),
-    noOutline(new THREE.MeshBasicMaterial({
-        color: 0xffed4f,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.7
-    }))
-);
-catchRing.rotation.x = -Math.PI / 2;
-catchRing.position.y = 0.06;
-scene.add(catchRing);
-
-function makePlayer(color) {
+function addPixelRing(radius, color) {
     const group = new THREE.Group();
-    const body = new THREE.Mesh(
-        new THREE.CapsuleGeometry(0.62, 1.9, 4, 12),
-        toon(color)
-    );
-    body.position.y = 1.7;
-    body.castShadow = true;
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 12), toon(color));
-    head.position.y = 3.05;
-    head.castShadow = true;
-    group.add(body);
-    group.add(head);
-    group.userData.body = body;
+    const brick = new THREE.BoxGeometry(0.7, 0.16, 0.7);
+    const mat = toon(color);
+    const count = 12;
+    for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const bit = new THREE.Mesh(brick, mat);
+        bit.position.set(Math.cos(angle) * radius, 0.2, Math.sin(angle) * radius);
+        group.add(bit);
+    }
+    scene.add(group);
     return group;
 }
 
-const throwerMesh = makePlayer(0x3b6cc4);
-const receiverMesh = makePlayer(0xe06728);
+const catchRing = addPixelRing(logic.CATCH_RADIUS * UNIT * 0.85, 0xf0d56a);
+
+function voxel(w, h, d, color, x, y, z) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), toon(color));
+    mesh.position.set(x, y, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
+}
+
+function makePlayer(palette) {
+    const group = new THREE.Group();
+    group.add(voxel(0.4, 0.85, 0.4, palette.pants, -0.24, 0.42, 0));
+    group.add(voxel(0.4, 0.85, 0.4, palette.pants, 0.24, 0.42, 0));
+    group.add(voxel(0.96, 1.15, 0.56, palette.shirt, 0, 1.28, 0));
+    group.add(voxel(0.32, 1.0, 0.32, palette.shirt, -0.68, 1.22, 0));
+    group.add(voxel(0.32, 1.0, 0.32, palette.skin, 0.68, 1.22, 0));
+    group.add(voxel(0.72, 0.72, 0.72, palette.skin, 0, 2.18, 0));
+    group.add(voxel(0.78, 0.26, 0.78, palette.hair, 0, 2.62, 0.04));
+    group.add(voxel(0.14, 0.14, 0.1, 0x1a1224, -0.16, 2.22, 0.36));
+    group.add(voxel(0.14, 0.14, 0.1, 0x1a1224, 0.16, 2.22, 0.36));
+    return group;
+}
+
+const throwerMesh = makePlayer({
+    skin: 0xf0c4a8,
+    shirt: 0x7b4bb8,
+    pants: 0x3d2a54,
+    hair: 0x2a1b3d
+});
+const receiverMesh = makePlayer({
+    skin: 0xe8b898,
+    shirt: 0xf2c94c,
+    pants: 0x5c3d1a,
+    hair: 0x4a2810
+});
 scene.add(throwerMesh);
 scene.add(receiverMesh);
 
 const disc = new THREE.Group();
 const discPlate = new THREE.Mesh(
-    new THREE.CylinderGeometry(DISC_RADIUS, DISC_RADIUS, 0.28, 40),
-    toon(0xfff6d8)
+    new THREE.CylinderGeometry(DISC_RADIUS, DISC_RADIUS, 0.34, 8),
+    toon(0xf7f0ff)
 );
 discPlate.castShadow = true;
 const discRim = new THREE.Mesh(
-    new THREE.TorusGeometry(DISC_RADIUS, 0.2, 10, 40),
-    toon(0xe06728)
+    new THREE.CylinderGeometry(DISC_RADIUS + 0.18, DISC_RADIUS + 0.18, 0.38, 8),
+    toon(0x8b5cc7)
 );
-discRim.rotation.x = Math.PI / 2;
 discRim.castShadow = true;
-disc.add(discPlate);
 disc.add(discRim);
+disc.add(discPlate);
 scene.add(disc);
 
 function blobShadow() {
