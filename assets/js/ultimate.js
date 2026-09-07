@@ -254,9 +254,10 @@ disc.add(discRim);
 disc.add(discStar);
 scene.add(disc);
 
-const METER_LENGTH = 6.4;
-const METER_WIDTH = 0.58;
-const METER_GAP = 1.4;
+const METER_LENGTH = 3.4;
+const METER_WIDTH = 0.34;
+const METER_BACK = 2.5;
+const METER_RIGHT = 0.85;
 const CAM_SIDE = -6.8;
 const LOOK_X = -3.1;
 
@@ -286,10 +287,10 @@ const meterDial = new THREE.Mesh(
 );
 meterDial.castShadow = true;
 const meterNeedle = new THREE.Mesh(
-    new THREE.BoxGeometry(0.14, 0.95, 0.14),
+    new THREE.BoxGeometry(0.1, 0.52, 0.1),
     glossy(0xa57ad4, { emissive: 0x8d68c4, emissiveIntensity: 0.2 })
 );
-meterNeedle.position.y = 0.5;
+meterNeedle.position.y = 0.28;
 meterDial.add(meterNeedle);
 scene.add(meterDial);
 
@@ -449,9 +450,9 @@ function placeActors(elapsed) {
 
     const aiming = game.state === "aiming";
     const range = logic.goodPowerRange(game);
-    const meterStartX = Math.max(discWorld.x, throwerWorld.x) + METER_GAP;
+    const meterStartX = throwerWorld.x + METER_RIGHT;
     const meterMidX = meterStartX + METER_LENGTH / 2;
-    const meterZ = throwerWorld.z + dir * 0.85;
+    const meterZ = throwerWorld.z - dir * METER_BACK;
     meterTray.visible = aiming;
     meterTrack.visible = aiming;
     meterGood.visible = aiming;
