@@ -157,7 +157,7 @@ function makeSpike(palette) {
         new THREE.SphereGeometry(0.78, 18, 14),
         glossy(palette.belly)
     );
-    belly.position.set(0, BODY_CENTER - 0.12, -0.42);
+    belly.position.set(0, BODY_CENTER - 0.12, 0.42);
     belly.scale.set(1.05, 0.9, 0.55);
     group.add(belly);
 
@@ -174,7 +174,7 @@ function makeSpike(palette) {
             continue;
         }
         used[key] = true;
-        if (z < -0.42 && Math.abs(x) < 0.62 && y > -0.2 && y < 0.62) {
+        if (z > 0.42 && Math.abs(x) < 0.62 && y > -0.2 && y < 0.62) {
             continue;
         }
         if (y < -0.78) {
@@ -192,13 +192,13 @@ function makeSpike(palette) {
     const dark = glossy(0x4a3560);
     function eye(x) {
         const ball = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12), white);
-        ball.position.set(x, BODY_CENTER + 0.18, -0.92);
+        ball.position.set(x, BODY_CENTER + 0.18, 0.92);
         group.add(ball);
         const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 10), dark);
-        pupil.position.set(x, BODY_CENTER + 0.16, -1.12);
+        pupil.position.set(x, BODY_CENTER + 0.16, 1.12);
         group.add(pupil);
         const shine = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), noOutline(glossy(0xffffff)));
-        shine.position.set(x - 0.06, BODY_CENTER + 0.24, -1.18);
+        shine.position.set(x - 0.06, BODY_CENTER + 0.24, 1.18);
         group.add(shine);
     }
     eye(-0.32);
@@ -207,7 +207,7 @@ function makeSpike(palette) {
     const blushMat = noOutline(glossy(palette.blush, { transparent: true, opacity: 0.7 }));
     function blush(x) {
         const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), blushMat);
-        mesh.position.set(x, BODY_CENTER - 0.08, -0.9);
+        mesh.position.set(x, BODY_CENTER - 0.08, 0.9);
         mesh.scale.set(1.15, 0.55, 0.4);
         group.add(mesh);
     }
@@ -218,18 +218,18 @@ function makeSpike(palette) {
         new THREE.TorusGeometry(0.16, 0.035, 8, 14, Math.PI),
         dark
     );
-    smile.position.set(0, BODY_CENTER - 0.18, -1.05);
+    smile.position.set(0, BODY_CENTER - 0.18, 1.05);
     smile.rotation.x = Math.PI / 2.2;
     smile.rotation.z = Math.PI;
     group.add(smile);
 
     const armGeo = new THREE.SphereGeometry(0.28, 12, 10);
     const leftArm = new THREE.Mesh(armGeo, bodyMat);
-    leftArm.position.set(-1.18, BODY_CENTER - 0.05, -0.15);
+    leftArm.position.set(-1.18, BODY_CENTER - 0.05, 0.2);
     leftArm.castShadow = true;
     group.add(leftArm);
     const rightArm = new THREE.Mesh(armGeo, bodyMat);
-    rightArm.position.set(1.18, BODY_CENTER - 0.05, -0.15);
+    rightArm.position.set(1.18, BODY_CENTER - 0.05, 0.2);
     rightArm.castShadow = true;
     group.add(rightArm);
 
