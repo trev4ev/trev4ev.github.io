@@ -393,7 +393,7 @@ function placeActors(elapsed) {
         const sideLean = THREE.MathUtils.clamp((receiverWorld.x - cutFromWorld.x) * 0.03, -0.28, 0.28);
         receiverMesh.rotation.z = -sideLean;
     } else if (caught) {
-        const turn = Math.min(1, Math.max(0, (game.resultT - 0.08) / 0.7));
+        const turn = Math.min(1, Math.max(0, (game.resultT - 0.05) / 0.85));
         const eased = turn * turn * (3 - 2 * turn);
         lookAtFlat(lookFrom, receiverWorld, cameraPos.x, cameraPos.z);
         lookAtFlat(lookTo, receiverWorld, downfieldPoint.x, downfieldPoint.z);
@@ -428,6 +428,7 @@ function placeActors(elapsed) {
     catchRing.position.x = catchPoint.x;
     catchRing.position.z = catchPoint.z;
     catchRing.rotation.z = elapsed * 0.4;
+    catchRing.visible = game.state !== "result";
 
     if (throwerMesh.visible) {
         throwerShadow.position.set(throwerWorld.x, 0.05, throwerWorld.z);
@@ -466,7 +467,9 @@ function placeActors(elapsed) {
 }
 
 function updateCamera(dt) {
-    const ease = 1 - Math.pow(0.0018, dt);
+    const caught = game.state === "result" && game.result === "caught";
+    const rate = caught ? 0.0000008 : 0.0018;
+    const ease = 1 - Math.pow(rate, dt);
     cameraPos.lerp(desiredCam, ease);
     cameraLook.lerp(desiredLook, ease);
     camera.position.copy(cameraPos);

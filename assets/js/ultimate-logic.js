@@ -16,7 +16,7 @@
     var CATCH_RADIUS = 14;
     var POWER_SPEED = 0.85;
     var THROW_DURATION = 1.8;
-    var RESULT_DURATION = 1.15;
+    var RESULT_DURATION = 1.5;
     var AIM_COOLDOWN = 0.4;
     var CUT_SIDE_OFFSET = 38;
     var CUT_DOWNFIELD_OFFSET = 20;
