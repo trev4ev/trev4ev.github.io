@@ -198,9 +198,8 @@
     }
 
     function continueFromCatch(game) {
-        var previousThrower = copyPoint(game.thrower);
-        game.thrower = copyPoint(game.receiver);
-        game.receiver = previousThrower;
+        game.thrower = copyPoint(THROWER_START);
+        game.receiver = copyPoint(RECEIVER_START);
         game.disc.x = game.thrower.x;
         game.disc.y = game.thrower.y;
         game.disc.height = 0;

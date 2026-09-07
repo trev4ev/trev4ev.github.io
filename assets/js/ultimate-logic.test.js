@@ -37,10 +37,10 @@ assert.strictEqual(caughtGame.disc.y, caughtGame.receiver.y);
 
 step(caughtGame, logic.RESULT_DURATION + 0.001);
 assert.strictEqual(caughtGame.state, "aiming");
-assert.strictEqual(caughtGame.thrower.x, logic.RECEIVER_START.x);
-assert.strictEqual(caughtGame.thrower.y, logic.RECEIVER_START.y);
-assert.strictEqual(caughtGame.receiver.x, logic.THROWER_START.x);
-assert.strictEqual(caughtGame.receiver.y, logic.THROWER_START.y);
+assert.strictEqual(caughtGame.thrower.x, logic.THROWER_START.x);
+assert.strictEqual(caughtGame.thrower.y, logic.THROWER_START.y);
+assert.strictEqual(caughtGame.receiver.x, logic.RECEIVER_START.x);
+assert.strictEqual(caughtGame.receiver.y, logic.RECEIVER_START.y);
 assert.strictEqual(caughtGame.disc.y, caughtGame.thrower.y);
 
 step(shortGame, logic.RESULT_DURATION + 0.001);
@@ -76,20 +76,27 @@ assert.strictEqual(logic.judgeLanding(edges, logic.landingForPower(edges, range.
 assert.strictEqual(logic.judgeLanding(edges, logic.landingForPower(edges, Math.max(0, range.min - 0.05))), "short");
 assert.strictEqual(logic.judgeLanding(edges, logic.landingForPower(edges, Math.min(1, range.max + 0.05))), "long");
 
-var reverse = throwWithPower(perfect);
-step(reverse, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
-assert.strictEqual(reverse.thrower.y, logic.RECEIVER_START.y);
-reverse.power = (logic.goodPowerRange(reverse).min + logic.goodPowerRange(reverse).max) / 2;
-assert.strictEqual(logic.startThrow(reverse), true);
-step(reverse, logic.THROW_DURATION + 0.001);
-assert.strictEqual(reverse.result, "caught");
+var nextThrow = throwWithPower(perfect);
+step(nextThrow, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
+assert.strictEqual(nextThrow.thrower.y, logic.THROWER_START.y);
+assert.strictEqual(nextThrow.receiver.y, logic.RECEIVER_START.y);
+nextThrow.power = (logic.goodPowerRange(nextThrow).min + logic.goodPowerRange(nextThrow).max) / 2;
+assert.strictEqual(logic.startThrow(nextThrow), true);
+step(nextThrow, logic.THROW_DURATION + 0.001);
+assert.strictEqual(nextThrow.result, "caught");
+assert.strictEqual(nextThrow.streak, 2);
 
-var reverseShort = throwWithPower(perfect);
-step(reverseShort, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
-reverseShort.power = 0.1;
-assert.strictEqual(logic.startThrow(reverseShort), true);
-step(reverseShort, logic.THROW_DURATION + 0.001);
-assert.strictEqual(reverseShort.result, "short");
+step(nextThrow, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
+assert.strictEqual(nextThrow.state, "aiming");
+assert.strictEqual(nextThrow.thrower.y, logic.THROWER_START.y);
+assert.strictEqual(nextThrow.receiver.y, logic.RECEIVER_START.y);
+
+var afterCatchShort = throwWithPower(perfect);
+step(afterCatchShort, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
+afterCatchShort.power = 0.1;
+assert.strictEqual(logic.startThrow(afterCatchShort), true);
+step(afterCatchShort, logic.THROW_DURATION + 0.001);
+assert.strictEqual(afterCatchShort.result, "short");
 
 var cutGame = logic.createGame();
 var startCut = logic.cutStart(cutGame);

@@ -76,40 +76,14 @@ scene.add(sun);
 scene.add(new THREE.AmbientLight(0xf3eafc, 0.4));
 
 const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(130, 48),
+    new THREE.CircleGeometry(220, 48),
     noOutline(new THREE.MeshLambertMaterial({ color: 0xf4eefb }))
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-const fieldWidth = logic.FIELD.width * UNIT;
-const fieldLength = logic.FIELD.height * UNIT;
-
-function addSoftField() {
-    const pitch = new THREE.Mesh(
-        new THREE.PlaneGeometry(fieldWidth + 2.4, fieldLength + 2.4, 1, 1),
-        noOutline(glossy(0xe9dff6, { shininess: 10, specular: 0xf6f1fb }))
-    );
-    pitch.rotation.x = -Math.PI / 2;
-    pitch.position.y = 0.02;
-    pitch.receiveShadow = true;
-    scene.add(pitch);
-
-    const line = noOutline(glossy(0xffffff, { shininess: 20, specular: 0xffffff }));
-    function stripe(width, length, x, z) {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, 0.04, length), line);
-        mesh.position.set(x, 0.05, z);
-        mesh.receiveShadow = true;
-        scene.add(mesh);
-    }
-    stripe(fieldWidth, 0.14, 0, -fieldLength / 2);
-    stripe(fieldWidth, 0.14, 0, fieldLength / 2);
-    stripe(0.14, fieldLength, -fieldWidth / 2, 0);
-    stripe(0.14, fieldLength, fieldWidth / 2, 0);
-}
-
-addSoftField();
+const clouds = [];
 
 function addCloud(x, y, z, scale) {
     const group = new THREE.Group();
@@ -128,6 +102,7 @@ function addCloud(x, y, z, scale) {
     group.position.set(x, y, z);
     group.scale.setScalar(scale);
     scene.add(group);
+    clouds.push(group);
 }
 
 addCloud(-28, 18, -22, 1.4);
@@ -322,6 +297,35 @@ const desiredLook = new THREE.Vector3();
 const throwerWorld = new THREE.Vector3();
 const receiverWorld = new THREE.Vector3();
 const discWorld = new THREE.Vector3();
+const faceDummy = new THREE.Object3D();
+const lookFrom = new THREE.Quaternion();
+const lookTo = new THREE.Quaternion();
+const downfieldPoint = new THREE.Vector3();
+const interest = new THREE.Vector3();
+const PARK = new THREE.Vector3(0, -80, 0);
+
+function lookAtFlat(quat, from, toX, toZ) {
+    faceDummy.position.copy(from);
+    faceDummy.up.set(0, 1, 0);
+    faceDummy.lookAt(toX, from.y, toZ);
+    quat.copy(faceDummy.quaternion);
+}
+
+function parkActor(mesh, shadow) {
+    mesh.visible = false;
+    mesh.position.copy(PARK);
+    if (shadow) {
+        shadow.visible = false;
+        shadow.position.copy(PARK);
+    }
+}
+
+function showActor(mesh, shadow) {
+    mesh.visible = true;
+    if (shadow) {
+        shadow.visible = true;
+    }
+}
 
 function updateMeter() {
     const range = logic.goodPowerRange(game);
@@ -335,7 +339,11 @@ function updateMeter() {
 }
 
 function placeActors(elapsed) {
+    const caught = game.state === "result" && game.result === "caught";
     const receiverPos = logic.receiverVisual(game);
+    if (game.state === "aiming" && receiverIntro > 0) {
+        receiverPos.x += (game.cutSide || 1) * 48 * receiverIntro;
+    }
     const dir = logic.throwDirection(game);
     const bob = game.state === "aiming" ? Math.sin(elapsed * 2.4) * 0.08 : 0;
     const runBob = game.state === "throwing" ? Math.abs(Math.sin(elapsed * 10)) * 0.16 : 0;
@@ -344,7 +352,7 @@ function placeActors(elapsed) {
     if (game.state === "throwing") {
         discLift = 1.7 + Math.sin(flight * Math.PI) * 8.5;
     } else if (game.state === "result") {
-        discLift = game.result === "caught" ? 1.85 : 0.28;
+        discLift = caught ? 1.85 : 0.28;
     }
 
     throwerWorld.copy(fieldToWorld(game.thrower.x, game.thrower.y, 0));
@@ -362,22 +370,34 @@ function placeActors(elapsed) {
     };
     discWorld.copy(fieldToWorld(discField.x, discField.y, discLift));
 
-    throwerMesh.position.copy(throwerWorld);
-    throwerMesh.position.y = bob;
+    if (caught) {
+        parkActor(throwerMesh, throwerShadow);
+    } else {
+        showActor(throwerMesh, throwerShadow);
+        throwerMesh.position.copy(throwerWorld);
+        throwerMesh.position.y = bob;
+        throwerMesh.lookAt(receiverWorld.x, throwerMesh.position.y, receiverWorld.z);
+        throwerMesh.rotation.z = 0;
+    }
+
+    showActor(receiverMesh, receiverShadow);
     receiverMesh.position.copy(receiverWorld);
     receiverMesh.position.y = runBob;
-    throwerMesh.lookAt(receiverWorld.x, throwerMesh.position.y, receiverWorld.z);
-    throwerMesh.rotation.z = 0;
-
     receiverMesh.rotation.z = 0;
-    if (game.state === "throwing" || (game.state === "result" && game.result === "caught")) {
+
+    downfieldPoint.set(receiverWorld.x, receiverWorld.y, receiverWorld.z + dir * 16);
+    if (game.state === "throwing") {
         receiverMesh.lookAt(cameraPos.x, receiverMesh.position.y, cameraPos.z);
-        if (game.state === "throwing") {
-            const cutFrom = logic.cutStart(game);
-            const cutFromWorld = fieldToWorld(cutFrom.x, cutFrom.y, 0);
-            const sideLean = THREE.MathUtils.clamp((receiverWorld.x - cutFromWorld.x) * 0.03, -0.28, 0.28);
-            receiverMesh.rotation.z = -sideLean;
-        }
+        const cutFrom = logic.cutStart(game);
+        const cutFromWorld = fieldToWorld(cutFrom.x, cutFrom.y, 0);
+        const sideLean = THREE.MathUtils.clamp((receiverWorld.x - cutFromWorld.x) * 0.03, -0.28, 0.28);
+        receiverMesh.rotation.z = -sideLean;
+    } else if (caught) {
+        const turn = Math.min(1, Math.max(0, (game.resultT - 0.08) / 0.7));
+        const eased = turn * turn * (3 - 2 * turn);
+        lookAtFlat(lookFrom, receiverWorld, cameraPos.x, cameraPos.z);
+        lookAtFlat(lookTo, receiverWorld, downfieldPoint.x, downfieldPoint.z);
+        receiverMesh.quaternion.slerpQuaternions(lookFrom, lookTo, eased);
     } else {
         receiverMesh.lookAt(throwerWorld.x, receiverMesh.position.y, throwerWorld.z);
     }
@@ -393,9 +413,12 @@ function placeActors(elapsed) {
         disc.rotation.x = 0.55;
         disc.rotation.z = 0.2;
         disc.rotation.y += 0.35;
-    } else if (game.state === "result" && game.result === "caught") {
+    } else if (caught) {
         disc.rotation.set(0.15, disc.rotation.y, 0);
+        disc.position.copy(receiverWorld);
         disc.position.y = 1.85;
+        disc.position.x += 1.1;
+        discWorld.copy(disc.position);
     } else {
         disc.rotation.x = 0.2;
         disc.rotation.z = 0.05;
@@ -406,26 +429,40 @@ function placeActors(elapsed) {
     catchRing.position.z = catchPoint.z;
     catchRing.rotation.z = elapsed * 0.4;
 
-    throwerShadow.position.set(throwerWorld.x, 0.05, throwerWorld.z);
+    if (throwerMesh.visible) {
+        throwerShadow.position.set(throwerWorld.x, 0.05, throwerWorld.z);
+    }
     receiverShadow.position.set(receiverWorld.x, 0.05, receiverWorld.z);
     discShadow.position.set(discWorld.x, 0.06, discWorld.z);
     const shadowScale = 0.75 + game.disc.height * 0.9;
     discShadow.scale.set(shadowScale, shadowScale, shadowScale);
     discShadow.material.opacity = 0.16 - game.disc.height * 0.07;
 
-    const follow = game.state === "throwing" ? 0.2 + Math.min(1, game.throwT) * 0.55
-        : game.state === "result" ? 0.45
-        : 0.08;
-    const interest = throwerWorld.clone().lerp(discWorld, follow);
+    const anchor = caught ? receiverWorld : throwerWorld;
+    ground.position.x = anchor.x;
+    ground.position.z = anchor.z;
+
     const back = -dir * 18;
-    desiredCam.set(
-        throwerWorld.x + 6.2,
-        5.8 + (game.state === "throwing" ? game.disc.height * 3.2 : 0),
-        interest.z + back
-    );
-    desiredLook.copy(discWorld);
-    desiredLook.y += 0.6;
-    desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.18);
+    if (caught) {
+        desiredCam.set(receiverWorld.x + 6.2, 5.8, receiverWorld.z + back);
+        desiredLook.set(receiverWorld.x, 1.4, receiverWorld.z + dir * 12);
+    } else if (game.state === "throwing") {
+        const follow = 0.2 + Math.min(1, game.throwT) * 0.55;
+        interest.copy(throwerWorld).lerp(discWorld, follow);
+        desiredCam.set(
+            throwerWorld.x + 6.2,
+            5.8 + game.disc.height * 3.2,
+            interest.z + back
+        );
+        desiredLook.copy(discWorld);
+        desiredLook.y += 0.6;
+        desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.18);
+    } else {
+        desiredCam.set(throwerWorld.x + 6.2, 5.8, throwerWorld.z + back);
+        desiredLook.copy(discWorld);
+        desiredLook.y += 0.6;
+        desiredLook.z = THREE.MathUtils.lerp(discWorld.z, receiverWorld.z, 0.18);
+    }
 }
 
 function updateCamera(dt) {
@@ -452,11 +489,31 @@ function resize() {
 let lastTime = 0;
 let elapsed = 0;
 let holdingCatch = false;
+let receiverIntro = 0;
 
-function swapPlayerMeshes() {
+function recycleCatcherAsThrower(catcherX, catcherY) {
+    const before = fieldToWorld(catcherX, catcherY, 0);
+    const after = fieldToWorld(logic.THROWER_START.x, logic.THROWER_START.y, 0);
+    const dx = after.x - before.x;
+    const dz = after.z - before.z;
+    cameraPos.x += dx;
+    cameraPos.z += dz;
+    cameraLook.x += dx;
+    cameraLook.z += dz;
+    desiredCam.x += dx;
+    desiredCam.z += dz;
+    desiredLook.x += dx;
+    desiredLook.z += dz;
+    clouds.forEach(function (cloud) {
+        cloud.position.x += dx;
+        cloud.position.z += dz;
+    });
     const previousThrower = throwerMesh;
     throwerMesh = receiverMesh;
     receiverMesh = previousThrower;
+    showActor(throwerMesh, throwerShadow);
+    showActor(receiverMesh, receiverShadow);
+    receiverIntro = 1;
 }
 
 function frame(now) {
@@ -469,10 +526,15 @@ function frame(now) {
         dt = 0.05;
     }
     elapsed += dt;
+    const catcherX = game.receiver.x;
+    const catcherY = game.receiver.y;
     holdingCatch = game.state === "result" && game.result === "caught";
     logic.update(game, dt);
     if (holdingCatch && game.state === "aiming") {
-        swapPlayerMeshes();
+        recycleCatcherAsThrower(catcherX, catcherY);
+    }
+    if (receiverIntro > 0) {
+        receiverIntro = Math.max(0, receiverIntro - dt * 1.35);
     }
     updateMeter();
     placeActors(elapsed);
