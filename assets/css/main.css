@@ -26,8 +26,8 @@ body {
 
 #content {
     position: fixed;
-    top: 28px;
-    left: 32px;
+    top: 25vh;
+    left: 25vw;
     z-index: 3;
     margin: 0;
     display: inline-block;
@@ -181,9 +181,9 @@ p {
 
 @media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
     #content {
-        top: 18px;
-        left: 18px;
-        max-width: 70vw;
+        top: 25vh;
+        left: 25vw;
+        max-width: 55vw;
     }
 
     li, p, a, ul {
