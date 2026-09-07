@@ -16,7 +16,7 @@
     var CATCH_RADIUS = 14;
     var POWER_SPEED = 0.85;
     var THROW_DURATION = 1.8;
-    var RESULT_DURATION = 1.5;
+    var RESULT_DURATION = 2.0;
     var AIM_COOLDOWN = 0.4;
     var CUT_SIDE_OFFSET = 38;
     var CUT_DOWNFIELD_OFFSET = 20;
@@ -135,13 +135,7 @@
         };
     }
 
-    function updateAiming(game, dt) {
-        if (game.state !== "aiming") {
-            return;
-        }
-        if (game.aimCooldown > 0) {
-            game.aimCooldown -= dt;
-        }
+    function tickPower(game, dt) {
         game.power += game.powerDir * POWER_SPEED * dt;
         if (game.power >= 1) {
             game.power = 1;
@@ -150,6 +144,16 @@
             game.power = 0;
             game.powerDir = 1;
         }
+    }
+
+    function updateAiming(game, dt) {
+        if (game.state !== "aiming") {
+            return;
+        }
+        if (game.aimCooldown > 0) {
+            game.aimCooldown -= dt;
+        }
+        tickPower(game, dt);
     }
 
     function startThrow(game) {
@@ -216,10 +220,12 @@
     }
 
     function restart(game) {
+        var savedPower = game.power;
+        var savedDir = game.powerDir;
         var next = createGame();
         game.state = next.state;
-        game.power = next.power;
-        game.powerDir = next.powerDir;
+        game.power = savedPower;
+        game.powerDir = savedDir;
         game.thrower = next.thrower;
         game.receiver = next.receiver;
         game.disc = next.disc;
@@ -236,6 +242,10 @@
     function updateResult(game, dt) {
         if (game.state !== "result") {
             return;
+        }
+        // Keep the power meter oscillating on misses from the throw value.
+        if (game.result !== "caught") {
+            tickPower(game, dt);
         }
         game.resultT += dt;
         if (game.resultT >= RESULT_DURATION) {

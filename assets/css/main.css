@@ -1,9 +1,10 @@
 :root {
-    --lilac: #f4eefb;
-    --lilac-deep: #4a3560;
-    --lilac-mark: #dcc8f0;
-    --lilac-mid: #c9b6e4;
-    --lilac-line: #8d74b0;
+    --lilac: #f0eefb;
+    --lilac-deep: #4a3a68;
+    --lilac-mark: #d8c6f2;
+    --hover-mark: #a8b8ec;
+    --lilac-mid: #c4b6e8;
+    --lilac-line: #8a74b8;
 }
 
 html, body {
@@ -35,8 +36,8 @@ body {
     display: inline-block;
     animation: fade-in 1.5s;
     text-align: left;
-    width: auto;
-    max-width: min(28rem, 32vw);
+    width: max-content;
+    max-width: calc(100vw - 48px);
     pointer-events: auto;
 }
 
@@ -46,6 +47,7 @@ h1, #name {
     position: relative;
     display: inline-block;
     pointer-events: auto;
+    white-space: nowrap;
 }
 
 a {
@@ -55,26 +57,6 @@ a {
     line-height: 1.3em;
     display: inline-block;
     pointer-events: auto;
-}
-
-#decagon:after {
-    background: #e4d8f4;
-}
-
-#figma:after {
-    background: #d4c0ea;
-}
-
-#janestreet:after {
-    background: #c9b6e4;
-}
-
-#stripe:after {
-    background: #b892de;
-}
-
-#abbq:after {
-    background: #a57ad4;
 }
 
 a:after, #name:after {
@@ -98,6 +80,10 @@ a:after, #name:after {
     width: 104%;
 }
 
+a:after {
+    background: var(--hover-mark);
+}
+
 a:hover:after {
     height: 1.4em;
 }
@@ -111,6 +97,7 @@ li {
     list-style-type: circle;
     line-height: 1.6em;
     font-size: 16px;
+    white-space: nowrap;
 }
 
 p {
@@ -139,7 +126,7 @@ p {
     overflow: hidden;
     border: none;
     border-radius: 0;
-    background: #f4eefb;
+    background: #f0eefb;
     box-shadow: none;
 }
 
@@ -153,39 +140,6 @@ p {
     touch-action: manipulation;
 }
 
-#ultimate-status {
-    position: absolute;
-    right: 28px;
-    bottom: 28px;
-    left: auto;
-    top: auto;
-    display: block;
-    margin: 0;
-    font-family: Nunito, 'Noto Sans', sans-serif;
-    font-weight: 800;
-    font-size: 18px;
-    line-height: 1.4;
-    min-height: 1.4em;
-    color: var(--lilac-deep);
-    text-shadow: 0 1px 0 #fff, 0 8px 16px rgba(255, 255, 255, 0.7);
-    pointer-events: none;
-}
-
-#ultimate-streak {
-    position: fixed;
-    right: 28px;
-    bottom: 54px;
-    z-index: 2;
-    display: block;
-    margin: 0;
-    font-family: Nunito, 'Noto Sans', sans-serif;
-    font-weight: 800;
-    font-size: 15px;
-    color: var(--lilac-deep);
-    min-height: 1.3em;
-    pointer-events: none;
-}
-
 @media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
     #content {
         top: max(16px, env(safe-area-inset-top, 0px) + 12px);
@@ -194,11 +148,10 @@ p {
         margin-left: auto;
         margin-right: auto;
         width: max-content;
-        max-width: min(17.5rem, calc(100vw - 56px));
+        max-width: calc(100vw - 24px);
         text-align: left;
         box-sizing: border-box;
         padding: 0 4px;
-        overflow-wrap: anywhere;
     }
 
     li, p, a, ul {
@@ -214,26 +167,14 @@ p {
         padding-left: 22px;
         margin-right: 0;
     }
+}
 
-    #ultimate-status {
-        font-size: 15px;
-        right: auto;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: max(16px, env(safe-area-inset-bottom, 0px) + 12px);
-        text-align: center;
-        width: max-content;
-        max-width: calc(100vw - 24px);
+@media only screen and (max-width: 380px), only screen and (max-device-width: 380px) {
+    li, p, a, ul {
+        font-size: 13.5px;
     }
 
-    #ultimate-streak {
-        font-size: 13px;
-        right: auto;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: max(40px, env(safe-area-inset-bottom, 0px) + 36px);
-        text-align: center;
-        width: max-content;
-        max-width: calc(100vw - 24px);
+    h1, #name {
+        font-size: 18px;
     }
 }

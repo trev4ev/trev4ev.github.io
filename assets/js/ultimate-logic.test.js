@@ -47,7 +47,7 @@ step(shortGame, logic.RESULT_DURATION + 0.001);
 assert.strictEqual(shortGame.state, "aiming");
 assert.strictEqual(shortGame.thrower.y, logic.THROWER_START.y);
 assert.strictEqual(shortGame.receiver.y, logic.RECEIVER_START.y);
-assert.ok(shortGame.power < 0.05);
+assert.ok(Math.abs(shortGame.power - 0.15) < 0.08);
 
 var aiming = logic.createGame();
 logic.update(aiming, 0.1);
