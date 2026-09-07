@@ -12,7 +12,7 @@ body {
 }
 
 #content {
-    margin: 25vh auto;
+    margin: 10vh auto 0;
     display: inline-block;
     animation: fade-in 1.5s;
     text-align: left;
@@ -104,9 +104,75 @@ p {
     }
 }
 
+#ultimate {
+    margin: 48px auto 80px;
+    max-width: 320px;
+    text-align: center;
+    user-select: none;
+    animation: fade-in 1.5s;
+    cursor: pointer;
+}
+
+#ultimate-field {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #7aa35a;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+#ultimate-status {
+    display: block;
+    margin: 0 0 12px;
+    font-size: 16px;
+    min-height: 1.4em;
+}
+
+#ultimate-streak {
+    display: block;
+    margin: 10px 0 0;
+    font-size: 14px;
+    min-height: 1.3em;
+}
+
+#power-meter {
+    margin-top: 12px;
+}
+
+#power-track {
+    position: relative;
+    height: 16px;
+    background: #ddd;
+    border: 1px solid #222;
+}
+
+#power-good {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: rgb(255, 237, 79);
+}
+
+#power-dial {
+    position: absolute;
+    top: -4px;
+    width: 4px;
+    height: 24px;
+    margin-left: -2px;
+    background: #111;
+}
+
+#power-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 12px;
+}
+
 @media (orientation: portrait){
     #content {
-        margin-top: 24vh;
+        margin-top: 8vh;
         width: 90%;
         text-align: center;
     }
@@ -127,6 +193,17 @@ p {
 
     li, p, a, ul {
         font-size: 42px;
+    }
+
+    #ultimate {
+        max-width: 90%;
+        width: 420px;
+    }
+
+    #ultimate-status,
+    #ultimate-streak,
+    #power-labels {
+        font-size: 16px;
     }
 }
 
