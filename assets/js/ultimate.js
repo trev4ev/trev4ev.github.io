@@ -557,7 +557,7 @@ function resize() {
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     const portrait = width / height < 0.78;
-    camSide = portrait ? -1.4 : CAM_SIDE;
+    camSide = portrait ? 0 : CAM_SIDE;
     lookX = portrait ? 0 : LOOK_X;
     camBack = portrait ? 23 : 20;
     camera.fov = portrait ? 50 : 42;
