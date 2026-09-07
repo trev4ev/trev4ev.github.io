@@ -557,17 +557,23 @@ function resize() {
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     const portrait = width / height < 0.78;
-    camSide = portrait ? -3.6 : CAM_SIDE;
+    camSide = portrait ? -1.4 : CAM_SIDE;
     lookX = portrait ? 0 : LOOK_X;
-    camBack = portrait ? 22 : 20;
-    camera.fov = portrait ? 48 : 42;
+    camBack = portrait ? 23 : 20;
+    camera.fov = portrait ? 50 : 42;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
     canvas.style.width = "100%";
     canvas.style.height = "100%";
     outline.setSize(width, height);
-}
+    if (elapsed) {
+        placeActors(elapsed);
+        cameraPos.copy(desiredCam);
+        cameraLook.copy(desiredLook);
+        camera.position.copy(cameraPos);
+        camera.lookAt(cameraLook);
+    }
 
 let lastTime = 0;
 let elapsed = 0;
