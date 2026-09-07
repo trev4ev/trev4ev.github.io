@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
+            <meta charset="utf-8">
             <!-- Global site tag (gtag.js) - Google Analytics -->
             <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83325513-2"></script>
             <script>
@@ -13,25 +14,32 @@
 
             <title>Trevor Aquino</title>
             <link rel = "stylesheet" type = "text/css" href = "assets/css/main.css">
-            <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
             <link rel="icon" type="image/png" sizes="96x96" href="favicons.ico/favicon-96x96.png">
+            <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+            <script type="importmap">
+            {
+              "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+              }
+            }
+            </script>
 	</head>
 	<body>
         <div id = 'content'>
             <h1>Hi! I'm <span id="name">Trevor Aquino</span></h1>
             <ul>
-                <li>EECS Student - UC Berkeley</li>
-                <li>SWE Intern - 
+                <li>Member of Technical Staff - 
+                    <p><a id="decagon" href = "https://decagon.ai" target="_blank">Decagon</a></p>
+                </li>
+                <li>Previously at 
+                    <p><a id="figma" href = "https://www.figma.com" target="_blank">Figma</a></p>,
+                    <p><a id="janestreet" href = "https://www.janestreet.com" target="_blank">Jane Street</a></p>, and
                     <p><a id="stripe" href = "https://stripe.com" target="_blank">Stripe</a></p>
                 </li>
-                <li>Developer - 
-                    <p><a id="codebase" href = "https://codebase.berkeley.edu/" target="_blank">Berkeley CodeBase</a></p>
-                </li>
-                <li>Designer - 
-                    <p><a id="ethical" href = "https://ethicalapparel.org/" target="_blank">EthiCal Apparel</a></p>
-                </li>
-                <li>Ultimate Frisbee Athlete - 
-                    <p><a id="ugmo" href = "https://www.youtube.com/watch?v=y6ZGYRqcFNg" target="_blank">Cal UGMO</a></p>
+                <li>Ultimate frisbee enjoyer with 
+                    <p><a id="abbq" href = "https://www.instagram.com/abbqfamily/" target="_blank">ABBQ</a></p>
                 </li>
                 <li>
                     <p><a id="linkedin" href = "https://www.linkedin.com/in/trevoraquino/" target="_blank">LinkedIn</a></p>,
@@ -41,5 +49,14 @@
                 </li>
             </ul>
         </div>
+        <section id="ultimate">
+            <div id="ultimate-stage">
+                <canvas id="ultimate-field"></canvas>
+                <p id="ultimate-status">Click to throw</p>
+            </div>
+            <p id="ultimate-streak"></p>
+        </section>
+        <script src="assets/js/ultimate-logic.js"></script>
+        <script type="module" src="assets/js/ultimate.js"></script>
 	</body>
 </html>
