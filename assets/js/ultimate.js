@@ -492,6 +492,8 @@ function placeClouds() {
         cloud.position.set(cameraPos.x + rig.x, rig.y, cameraPos.z + rig.z);
     });
 }
+
+function updateCamera(dt) {
     const caught = game.state === "result" && game.result === "caught";
     const rate = caught ? 0.0000008 : 0.0018;
     const ease = 1 - Math.pow(rate, dt);
@@ -499,6 +501,7 @@ function placeClouds() {
     cameraLook.lerp(desiredLook, ease);
     camera.position.copy(cameraPos);
     camera.lookAt(cameraLook);
+    placeClouds();
 }
 
 function resize() {
