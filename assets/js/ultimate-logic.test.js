@@ -100,7 +100,7 @@ assert.strictEqual(afterCatchShort.result, "short");
 
 var cutGame = logic.createGame();
 var startCut = logic.cutStart(cutGame);
-assert.ok(startCut.x !== cutGame.receiver.x);
+assert.ok(startCut.x > cutGame.receiver.x);
 assert.ok(startCut.y < cutGame.receiver.y);
 var idlePos = logic.receiverVisual(cutGame);
 assert.strictEqual(idlePos.x, startCut.x);

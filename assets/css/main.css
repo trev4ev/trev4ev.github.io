@@ -4,21 +4,18 @@
     --lilac-mark: #dcc8f0;
     --lilac-mid: #c9b6e4;
     --lilac-line: #8d74b0;
-    --gold: #d8c4f2;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
 }
 
 body {
     background: var(--lilac);
     font-family: 'Noto Sans', sans-serif;
     color: var(--lilac-deep);
-    text-align: center;
-}
-
-body {
-    background: var(--lilac);
-    font-family: 'Noto Sans', sans-serif;
-    color: var(--lilac-deep);
-    text-align: center;
 }
 
 @keyframes fade-in {
@@ -28,11 +25,17 @@ body {
 }
 
 #content {
-    margin: 10vh auto 0;
+    position: fixed;
+    top: 28px;
+    left: 32px;
+    z-index: 3;
+    margin: 0;
     display: inline-block;
     animation: fade-in 1.5s;
     text-align: left;
     width: auto;
+    max-width: 42vw;
+    pointer-events: auto;
 }
 
 h1, #name {
@@ -40,6 +43,7 @@ h1, #name {
     margin-bottom: 5px;
     position: relative;
     display: inline-block;
+    pointer-events: auto;
 }
 
 a {
@@ -48,6 +52,7 @@ a {
     border-bottom: 1px solid var(--lilac-deep);
     line-height: 1.3em;
     display: inline-block;
+    pointer-events: auto;
 }
 
 #stripe:after {
@@ -79,7 +84,7 @@ a:after, #name:after {
     bottom: 0;
     transform: translateX(-50%);
     z-index: -1;
-    transition: 0.4s; 
+    transition: 0.4s;
 }
 
 #name:after {
@@ -108,36 +113,27 @@ p {
     display: inline-block;
 }
 
-@media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
-    li, p, a, ul {
-        font-size: 26px;
-    }
-    h1, #name{
-        font-size: 36px;
-    }
-    #content {
-        margin-top: 10vh;
-    }
-}
-
 #ultimate {
-    margin: 48px auto 80px;
-    max-width: 560px;
-    width: 90%;
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    max-width: none;
+    width: 100%;
+    height: 100%;
     text-align: center;
     user-select: none;
-    animation: fade-in 1.5s;
     cursor: pointer;
+    z-index: 1;
 }
 
 #ultimate-stage {
-    position: relative;
+    position: absolute;
+    inset: 0;
     overflow: hidden;
-    border: 3px solid #d8c8ec;
-    border-radius: 28px;
+    border: none;
+    border-radius: 0;
     background: #f4eefb;
-    aspect-ratio: 5 / 4;
-    box-shadow: 0 16px 36px rgba(90, 70, 120, 0.12);
+    box-shadow: none;
 }
 
 #ultimate-field {
@@ -152,9 +148,10 @@ p {
 
 #ultimate-status {
     position: absolute;
-    top: 14px;
-    left: 0;
-    right: 0;
+    right: 28px;
+    bottom: 28px;
+    left: auto;
+    top: auto;
     display: block;
     margin: 0;
     font-family: Nunito, 'Noto Sans', sans-serif;
@@ -168,95 +165,44 @@ p {
 }
 
 #ultimate-streak {
+    position: fixed;
+    right: 28px;
+    bottom: 54px;
+    z-index: 2;
     display: block;
-    margin: 12px 0 0;
+    margin: 0;
     font-family: Nunito, 'Noto Sans', sans-serif;
     font-weight: 800;
     font-size: 15px;
     color: var(--lilac-deep);
     min-height: 1.3em;
+    pointer-events: none;
 }
 
-#power-meter {
-    position: absolute;
-    left: 16px;
-    right: 16px;
-    bottom: 12px;
-}
-
-#power-track {
-    position: relative;
-    height: 16px;
-    background: #fbf8ff;
-    border: 2px solid #d8c8ec;
-    border-radius: 999px;
-}
-
-#power-good {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    background: var(--gold);
-}
-
-#power-dial {
-    position: absolute;
-    top: -3px;
-    width: 10px;
-    height: 22px;
-    margin-left: -5px;
-    background: #b892de;
-    border: 2px solid #fff;
-    border-radius: 999px;
-    box-shadow: 0 2px 6px rgba(74, 53, 96, 0.22);
-}
-
-#power-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-    font-family: Nunito, 'Noto Sans', sans-serif;
-    font-weight: 800;
-    font-size: 12px;
-    color: var(--lilac-deep);
-}
-
-@media (orientation: portrait){
+@media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
     #content {
-        margin-top: 8vh;
-        width: 90%;
-        text-align: center;
-    }
-
-    h1, #name {
-        text-align: center;
-        font-size: 70px;
-        margin-bottom: 10px;
-    }
-
-    ul {
-        display: inline-block;
-        margin: auto;
-        text-align: left;
-        padding-left: 50px;
-        white-space: nowrap;
+        top: 18px;
+        left: 18px;
+        max-width: 70vw;
     }
 
     li, p, a, ul {
-        font-size: 42px;
+        font-size: 18px;
     }
 
-    #ultimate {
-        max-width: 90%;
-        width: 560px;
+    h1, #name {
+        font-size: 22px;
     }
 
     #ultimate-status {
-        font-size: 20px;
+        font-size: 16px;
+        right: 16px;
+        bottom: 16px;
     }
 
-    #ultimate-streak,
-    #power-labels {
-        font-size: 14px;
+    #ultimate-streak {
+        font-size: 13px;
+        right: 16px;
+        bottom: 40px;
     }
 }

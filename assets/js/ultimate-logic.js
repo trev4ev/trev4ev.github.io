@@ -34,7 +34,7 @@
 
     function cutStart(game) {
         var dir = throwDirection(game);
-        var side = game.cutSide || 1;
+        var side = 1;
         return {
             x: game.receiver.x + side * CUT_SIDE_OFFSET,
             y: game.receiver.y + dir * CUT_DOWNFIELD_OFFSET
@@ -211,7 +211,7 @@
         game.result = null;
         game.resultT = 0;
         game.aimCooldown = AIM_COOLDOWN;
-        game.cutSide = -(game.cutSide || 1);
+        game.cutSide = 1;
         game.state = "aiming";
     }
 

@@ -5,8 +5,6 @@ const logic = window.UltimateLogic;
 const canvas = document.getElementById("ultimate-field");
 const statusEl = document.getElementById("ultimate-status");
 const streakEl = document.getElementById("ultimate-streak");
-const meterGood = document.getElementById("power-good");
-const meterDial = document.getElementById("power-dial");
 const root = document.getElementById("ultimate");
 
 if (!canvas || !logic) {
@@ -14,8 +12,8 @@ if (!canvas || !logic) {
 }
 
 const UNIT = 0.42;
-const DISC_RADIUS = 1.55;
-const DISC_HOLD_SIDE = 9;
+const DISC_RADIUS = 0.72;
+const DISC_HOLD_SIDE = 6;
 const BODY_CENTER = 1.28;
 const game = logic.createGame();
 window.ultimateGame = game;
@@ -108,14 +106,6 @@ function addCloud(x, y, z, scale) {
 addCloud(-28, 18, -22, 1.4);
 addCloud(24, 16, -30, 1.1);
 addCloud(8, 20, 18, 0.9);
-
-const catchRing = new THREE.Mesh(
-    new THREE.TorusGeometry(logic.CATCH_RADIUS * UNIT * 0.82, 0.1, 10, 36),
-    glossy(0xd8c4f2, { emissive: 0xc9b4e8, emissiveIntensity: 0.18 })
-);
-catchRing.rotation.x = Math.PI / 2;
-catchRing.position.y = 0.1;
-scene.add(catchRing);
 
 function makeSpike(palette) {
     const group = new THREE.Group();
@@ -244,18 +234,18 @@ scene.add(receiverMesh);
 
 const disc = new THREE.Group();
 const discPlate = new THREE.Mesh(
-    new THREE.CylinderGeometry(DISC_RADIUS, DISC_RADIUS * 0.92, 0.22, 32),
+    new THREE.CylinderGeometry(DISC_RADIUS, DISC_RADIUS * 0.92, 0.14, 32),
     glossy(0xffffff, { shininess: 120 })
 );
 discPlate.castShadow = true;
 const discRim = new THREE.Mesh(
-    new THREE.TorusGeometry(DISC_RADIUS * 0.92, 0.16, 12, 36),
+    new THREE.TorusGeometry(DISC_RADIUS * 0.92, 0.09, 12, 36),
     glossy(0xc4a6e6, { shininess: 110 })
 );
 discRim.rotation.x = Math.PI / 2;
 discRim.castShadow = true;
 const discStar = new THREE.Mesh(
-    new THREE.SphereGeometry(0.42, 16, 12),
+    new THREE.SphereGeometry(0.18, 16, 12),
     glossy(0xe6d8f6, { shininess: 140 })
 );
 discStar.scale.set(1, 0.28, 1);
@@ -263,6 +253,29 @@ disc.add(discPlate);
 disc.add(discRim);
 disc.add(discStar);
 scene.add(disc);
+
+function makeCrescent() {
+    const shape = new THREE.Shape();
+    shape.absarc(0, 0, 0.58, 0, Math.PI * 2, false);
+    const hole = new THREE.Path();
+    hole.absarc(0.2, 0.05, 0.4, 0, Math.PI * 2, true);
+    shape.holes.push(hole);
+    const geo = new THREE.ExtrudeGeometry(shape, {
+        depth: 0.07,
+        bevelEnabled: false,
+        curveSegments: 28
+    });
+    geo.center();
+    const mesh = new THREE.Mesh(geo, glossy(0xb892de, {
+        emissive: 0x9b74d0,
+        emissiveIntensity: 0.16
+    }));
+    mesh.castShadow = true;
+    return mesh;
+}
+
+const crescent = makeCrescent();
+scene.add(crescent);
 
 function blobShadow() {
     const mesh = new THREE.Mesh(
@@ -282,7 +295,7 @@ function blobShadow() {
 const throwerShadow = blobShadow();
 const receiverShadow = blobShadow();
 const discShadow = blobShadow();
-discShadow.scale.setScalar(0.75);
+discShadow.scale.setScalar(0.45);
 
 function fieldToWorld(x, y, height) {
     return new THREE.Vector3(
@@ -328,10 +341,6 @@ function showActor(mesh, shadow) {
 }
 
 function updateMeter() {
-    const range = logic.goodPowerRange(game);
-    meterGood.style.left = range.min * 100 + "%";
-    meterGood.style.width = (range.max - range.min) * 100 + "%";
-    meterDial.style.left = game.power * 100 + "%";
     statusEl.textContent = logic.statusText(game);
     streakEl.textContent = game.streak ? "Streak: " + game.streak : "";
     root.dataset.state = game.state;
@@ -342,7 +351,7 @@ function placeActors(elapsed) {
     const caught = game.state === "result" && game.result === "caught";
     const receiverPos = logic.receiverVisual(game);
     if (game.state === "aiming" && receiverIntro > 0) {
-        receiverPos.x += (game.cutSide || 1) * 48 * receiverIntro;
+        receiverPos.x += 48 * receiverIntro;
     }
     const dir = logic.throwDirection(game);
     const bob = game.state === "aiming" ? Math.sin(elapsed * 2.4) * 0.08 : 0;
@@ -414,19 +423,28 @@ function placeActors(elapsed) {
     } else if (caught) {
         disc.rotation.set(0.15, disc.rotation.y, 0);
         disc.position.copy(receiverWorld);
-        disc.position.y = 1.85;
-        disc.position.x += 1.1;
+        disc.position.y = 1.55;
+        disc.position.x += 0.7;
         discWorld.copy(disc.position);
     } else {
         disc.rotation.x = 0.2;
         disc.rotation.z = 0.05;
     }
 
-    const catchPoint = fieldToWorld(game.receiver.x, game.receiver.y, 0.08);
-    catchRing.position.x = catchPoint.x;
-    catchRing.position.z = catchPoint.z;
-    catchRing.rotation.z = elapsed * 0.4;
-    catchRing.visible = game.state !== "result";
+    const aiming = game.state === "aiming";
+    crescent.visible = aiming;
+    if (aiming) {
+        const range = logic.goodPowerRange(game);
+        const inGood = game.power >= range.min && game.power <= range.max;
+        crescent.position.copy(discWorld);
+        crescent.position.x += 1.05;
+        crescent.position.y += (game.power - 0.5) * 2.35;
+        crescent.position.z += 0.15;
+        crescent.lookAt(cameraPos.x, crescent.position.y, cameraPos.z);
+        crescent.material.color.setHex(inGood ? 0xe6d8f6 : 0xb892de);
+        crescent.material.emissive.setHex(inGood ? 0xc9b6e4 : 0x9b74d0);
+        crescent.material.emissiveIntensity = inGood ? 0.42 : 0.14;
+    }
 
     if (throwerMesh.visible) {
         throwerShadow.position.set(throwerWorld.x, 0.05, throwerWorld.z);
