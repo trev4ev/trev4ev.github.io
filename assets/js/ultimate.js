@@ -281,10 +281,16 @@ const meterGood = new THREE.Mesh(
 scene.add(meterGood);
 
 const meterDial = new THREE.Mesh(
-    new THREE.BoxGeometry(0.28, 0.22, METER_WIDTH * 1.28),
-    glossy(0xb892de, { emissive: 0x9b74d0, emissiveIntensity: 0.22 })
+    new THREE.BoxGeometry(0.26, 0.1, METER_WIDTH * 1.35),
+    glossy(0xb892de, { emissive: 0x9b74d0, emissiveIntensity: 0.28 })
 );
 meterDial.castShadow = true;
+const meterNeedle = new THREE.Mesh(
+    new THREE.BoxGeometry(0.14, 0.95, 0.14),
+    glossy(0xa57ad4, { emissive: 0x8d68c4, emissiveIntensity: 0.2 })
+);
+meterNeedle.position.y = 0.5;
+meterDial.add(meterNeedle);
 scene.add(meterDial);
 
 function blobShadow() {
@@ -462,7 +468,7 @@ function placeActors(elapsed) {
         );
         meterDial.position.set(
             meterStartX + game.power * METER_LENGTH,
-            0.16,
+            0.08,
             meterZ
         );
     }
