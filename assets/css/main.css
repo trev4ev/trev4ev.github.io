@@ -1,10 +1,17 @@
 :root {
-    --lilac: #efe6f8;
-    --lilac-deep: #3b2752;
-    --lilac-mark: #d4b4f0;
-    --lilac-mid: #c9a6ea;
-    --lilac-line: #5a3d7a;
-    --gold: #f0d56a;
+    --lilac: #f4eefb;
+    --lilac-deep: #4a3560;
+    --lilac-mark: #dcc8f0;
+    --lilac-mid: #c9b6e4;
+    --lilac-line: #8d74b0;
+    --gold: #d8c4f2;
+}
+
+body {
+    background: var(--lilac);
+    font-family: 'Noto Sans', sans-serif;
+    color: var(--lilac-deep);
+    text-align: center;
 }
 
 body {
@@ -44,19 +51,19 @@ a {
 }
 
 #stripe:after {
-    background: #b7c8f8;
+    background: #e4d8f4;
 }
 
 #codebase:after {
-    background: #b49cf5;
+    background: #d4c0ea;
 }
 
 #ethical:after {
-    background: #c8e8b0;
+    background: #c9b6e4;
 }
 
 #ugmo:after {
-    background: var(--gold);
+    background: #b892de;
 }
 
 a:after, #name:after {
@@ -126,11 +133,11 @@ p {
 #ultimate-stage {
     position: relative;
     overflow: hidden;
-    border: 3px solid #e4b7d8;
+    border: 3px solid #d8c8ec;
     border-radius: 28px;
-    background: #ffe8f4;
+    background: #f4eefb;
     aspect-ratio: 5 / 4;
-    box-shadow: 0 16px 36px rgba(180, 110, 160, 0.18);
+    box-shadow: 0 16px 36px rgba(90, 70, 120, 0.12);
 }
 
 #ultimate-field {
@@ -155,7 +162,7 @@ p {
     font-size: 18px;
     line-height: 1.4;
     min-height: 1.4em;
-    color: #7a3d68;
+    color: var(--lilac-deep);
     text-shadow: 0 1px 0 #fff, 0 8px 16px rgba(255, 255, 255, 0.7);
     pointer-events: none;
 }
@@ -166,7 +173,7 @@ p {
     font-family: Nunito, 'Noto Sans', sans-serif;
     font-weight: 800;
     font-size: 15px;
-    color: #7a3d68;
+    color: var(--lilac-deep);
     min-height: 1.3em;
 }
 
@@ -180,8 +187,8 @@ p {
 #power-track {
     position: relative;
     height: 16px;
-    background: #fff4fb;
-    border: 2px solid #e4b7d8;
+    background: #fbf8ff;
+    border: 2px solid #d8c8ec;
     border-radius: 999px;
 }
 
@@ -189,7 +196,7 @@ p {
     position: absolute;
     top: 0;
     height: 100%;
-    background: #ffe27a;
+    background: var(--gold);
 }
 
 #power-dial {
@@ -198,10 +205,10 @@ p {
     width: 10px;
     height: 22px;
     margin-left: -5px;
-    background: #ff8eb8;
+    background: #b892de;
     border: 2px solid #fff;
     border-radius: 999px;
-    box-shadow: 0 2px 6px rgba(122, 61, 104, 0.25);
+    box-shadow: 0 2px 6px rgba(74, 53, 96, 0.22);
 }
 
 #power-labels {
@@ -211,7 +218,7 @@ p {
     font-family: Nunito, 'Noto Sans', sans-serif;
     font-weight: 800;
     font-size: 12px;
-    color: #7a3d68;
+    color: var(--lilac-deep);
 }
 
 @media (orientation: portrait){

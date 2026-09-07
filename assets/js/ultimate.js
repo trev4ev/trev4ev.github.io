@@ -21,9 +21,9 @@ const game = logic.createGame();
 window.ultimateGame = game;
 
 const scene = new THREE.Scene();
-const sky = 0xffe8f4;
+const sky = 0xf4eefb;
 scene.background = new THREE.Color(sky);
-scene.fog = new THREE.Fog(sky, 70, 170);
+scene.fog = new THREE.Fog(sky, 48, 120);
 
 const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
 const cameraPos = new THREE.Vector3(0, 8, 28);
@@ -42,7 +42,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const outline = new OutlineEffect(renderer, {
     defaultThickness: 0.0075,
-    defaultColor: [0.45, 0.28, 0.4],
+    defaultColor: [0.35, 0.26, 0.48],
     defaultAlpha: 0.85
 });
 
@@ -60,10 +60,10 @@ function glossy(color, extra) {
     }, extra || {}));
 }
 
-const hemi = new THREE.HemisphereLight(0xfff0fb, 0xc9a8d8, 1.15);
+const hemi = new THREE.HemisphereLight(0xffffff, 0xc9b6de, 1.1);
 scene.add(hemi);
 
-const sun = new THREE.DirectionalLight(0xfff6e8, 1.05);
+const sun = new THREE.DirectionalLight(0xf7f2ff, 1.0);
 sun.position.set(16, 30, 14);
 sun.castShadow = true;
 sun.shadow.mapSize.set(1024, 1024);
@@ -73,11 +73,11 @@ sun.shadow.camera.top = 42;
 sun.shadow.camera.bottom = -42;
 sun.shadow.radius = 6;
 scene.add(sun);
-scene.add(new THREE.AmbientLight(0xffe4f4, 0.35));
+scene.add(new THREE.AmbientLight(0xf3eafc, 0.4));
 
 const ground = new THREE.Mesh(
     new THREE.CircleGeometry(130, 48),
-    noOutline(new THREE.MeshLambertMaterial({ color: 0xf6d7ea }))
+    noOutline(new THREE.MeshLambertMaterial({ color: 0xf4eefb }))
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
@@ -87,47 +87,33 @@ const fieldWidth = logic.FIELD.width * UNIT;
 const fieldLength = logic.FIELD.height * UNIT;
 
 function addSoftField() {
-    const grass = new THREE.Mesh(
-        new THREE.PlaneGeometry(fieldWidth + 1.6, fieldLength + 1.6, 1, 1),
-        noOutline(glossy(0x9ed9a0, { shininess: 18, specular: 0xc8f0cc }))
+    const pitch = new THREE.Mesh(
+        new THREE.PlaneGeometry(fieldWidth + 2.4, fieldLength + 2.4, 1, 1),
+        noOutline(glossy(0xe9dff6, { shininess: 10, specular: 0xf6f1fb }))
     );
-    grass.rotation.x = -Math.PI / 2;
-    grass.position.y = 0.02;
-    grass.receiveShadow = true;
-    scene.add(grass);
+    pitch.rotation.x = -Math.PI / 2;
+    pitch.position.y = 0.02;
+    pitch.receiveShadow = true;
+    scene.add(pitch);
 
-    function endzone(z) {
-        const zone = new THREE.Mesh(
-            new THREE.PlaneGeometry(fieldWidth + 0.4, fieldLength / 6.5),
-            noOutline(glossy(0xe7c4ff, { shininess: 22, specular: 0xf6e8ff }))
-        );
-        zone.rotation.x = -Math.PI / 2;
-        zone.position.set(0, 0.04, z);
-        zone.receiveShadow = true;
-        scene.add(zone);
-    }
-    endzone(-fieldLength / 2 + fieldLength / 13);
-    endzone(fieldLength / 2 - fieldLength / 13);
-
-    const line = noOutline(glossy(0xfff7ff, { shininess: 40 }));
+    const line = noOutline(glossy(0xffffff, { shininess: 20, specular: 0xffffff }));
     function stripe(width, length, x, z) {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, 0.08, length), line);
-        mesh.position.set(x, 0.08, z);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, 0.04, length), line);
+        mesh.position.set(x, 0.05, z);
         mesh.receiveShadow = true;
         scene.add(mesh);
     }
-    stripe(fieldWidth + 0.5, 0.28, 0, -fieldLength / 2);
-    stripe(fieldWidth + 0.5, 0.28, 0, fieldLength / 2);
-    stripe(0.28, fieldLength, -fieldWidth / 2, 0);
-    stripe(0.28, fieldLength, fieldWidth / 2, 0);
-    stripe(fieldWidth, 0.2, 0, 0);
+    stripe(fieldWidth, 0.14, 0, -fieldLength / 2);
+    stripe(fieldWidth, 0.14, 0, fieldLength / 2);
+    stripe(0.14, fieldLength, -fieldWidth / 2, 0);
+    stripe(0.14, fieldLength, fieldWidth / 2, 0);
 }
 
 addSoftField();
 
 function addCloud(x, y, z, scale) {
     const group = new THREE.Group();
-    const mat = noOutline(glossy(0xfff8fd, { shininess: 12 }));
+    const mat = noOutline(glossy(0xffffff, { shininess: 12 }));
     const puffs = [
         [0, 0, 0, 1.6],
         [1.4, 0.15, 0.2, 1.15],
@@ -148,36 +134,9 @@ addCloud(-28, 18, -22, 1.4);
 addCloud(24, 16, -30, 1.1);
 addCloud(8, 20, 18, 0.9);
 
-function addFlower(x, z, petalColor) {
-    const group = new THREE.Group();
-    const stem = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.07, 0.09, 0.7, 8),
-        glossy(0x6fbf78)
-    );
-    stem.position.y = 0.35;
-    group.add(stem);
-    for (let i = 0; i < 5; i++) {
-        const petal = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), glossy(petalColor));
-        const angle = (i / 5) * Math.PI * 2;
-        petal.position.set(Math.cos(angle) * 0.28, 0.78, Math.sin(angle) * 0.28);
-        petal.scale.set(1, 0.55, 1);
-        group.add(petal);
-    }
-    const center = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), glossy(0xfff1a8));
-    center.position.y = 0.8;
-    group.add(center);
-    group.position.set(x, 0, z);
-    scene.add(group);
-}
-
-addFlower(-fieldWidth / 2 - 3.2, 8, 0xff9ec8);
-addFlower(fieldWidth / 2 + 3.4, -6, 0xffc56e);
-addFlower(-fieldWidth / 2 - 4.4, -16, 0xc9b4ff);
-addFlower(fieldWidth / 2 + 4.1, 18, 0xff9ec8);
-
 const catchRing = new THREE.Mesh(
-    new THREE.TorusGeometry(logic.CATCH_RADIUS * UNIT * 0.82, 0.12, 10, 36),
-    glossy(0xffe27a, { emissive: 0xffd56a, emissiveIntensity: 0.25 })
+    new THREE.TorusGeometry(logic.CATCH_RADIUS * UNIT * 0.82, 0.1, 10, 36),
+    glossy(0xd8c4f2, { emissive: 0xc9b4e8, emissiveIntensity: 0.18 })
 );
 catchRing.rotation.x = Math.PI / 2;
 catchRing.position.y = 0.1;
@@ -230,7 +189,7 @@ function makeSpike(palette) {
     }
 
     const white = glossy(0xffffff);
-    const dark = glossy(0x3a2438);
+    const dark = glossy(0x4a3560);
     function eye(x) {
         const ball = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12), white);
         ball.position.set(x, BODY_CENTER + 0.18, -0.92);
@@ -291,19 +250,19 @@ function makeSpike(palette) {
     return group;
 }
 
-const throwerMesh = makeSpike({
-    body: 0xff8eb8,
-    spike: 0xf25a9a,
-    belly: 0xffd0e6,
-    blush: 0xff6fa5,
-    feet: 0xe86aa0
+let throwerMesh = makeSpike({
+    body: 0xb892de,
+    spike: 0x8d68c4,
+    belly: 0xe9ddf6,
+    blush: 0xc9b0e8,
+    feet: 0xa57ad4
 });
-const receiverMesh = makeSpike({
-    body: 0xffd56f,
-    spike: 0xf0a63a,
-    belly: 0xffefc2,
-    blush: 0xff9eb0,
-    feet: 0xe8b04a
+let receiverMesh = makeSpike({
+    body: 0xf4eefb,
+    spike: 0xd4c0ea,
+    belly: 0xffffff,
+    blush: 0xe4d6f4,
+    feet: 0xe6dcf2
 });
 scene.add(throwerMesh);
 scene.add(receiverMesh);
@@ -311,18 +270,18 @@ scene.add(receiverMesh);
 const disc = new THREE.Group();
 const discPlate = new THREE.Mesh(
     new THREE.CylinderGeometry(DISC_RADIUS, DISC_RADIUS * 0.92, 0.22, 32),
-    glossy(0xfff7fb, { shininess: 120 })
+    glossy(0xffffff, { shininess: 120 })
 );
 discPlate.castShadow = true;
 const discRim = new THREE.Mesh(
     new THREE.TorusGeometry(DISC_RADIUS * 0.92, 0.16, 12, 36),
-    glossy(0xd7a6ff, { shininess: 110 })
+    glossy(0xc4a6e6, { shininess: 110 })
 );
 discRim.rotation.x = Math.PI / 2;
 discRim.castShadow = true;
 const discStar = new THREE.Mesh(
     new THREE.SphereGeometry(0.42, 16, 12),
-    glossy(0xff9ec8, { shininess: 140 })
+    glossy(0xe6d8f6, { shininess: 140 })
 );
 discStar.scale.set(1, 0.28, 1);
 disc.add(discPlate);
@@ -334,7 +293,7 @@ function blobShadow() {
     const mesh = new THREE.Mesh(
         new THREE.CircleGeometry(0.95, 24),
         noOutline(new THREE.MeshBasicMaterial({
-            color: 0x7a4d72,
+            color: 0x6b4f86,
             transparent: true,
             opacity: 0.18
         }))
@@ -408,16 +367,18 @@ function placeActors(elapsed) {
     receiverMesh.position.copy(receiverWorld);
     receiverMesh.position.y = runBob;
     throwerMesh.lookAt(receiverWorld.x, throwerMesh.position.y, receiverWorld.z);
+    throwerMesh.rotation.z = 0;
 
-    const cutFrom = logic.cutStart(game);
-    const cutFromWorld = fieldToWorld(cutFrom.x, cutFrom.y, 0);
-    const cutDelta = receiverWorld.clone().sub(cutFromWorld);
-    if (game.state === "throwing" && cutDelta.lengthSq() > 0.01) {
-        const ahead = receiverWorld.clone().add(cutDelta.normalize());
-        receiverMesh.lookAt(ahead.x, receiverMesh.position.y, ahead.z);
-        receiverMesh.rotation.z = THREE.MathUtils.clamp(-(ahead.x - receiverWorld.x) * 0.25, -0.35, 0.35);
+    receiverMesh.rotation.z = 0;
+    if (game.state === "throwing" || (game.state === "result" && game.result === "caught")) {
+        receiverMesh.lookAt(cameraPos.x, receiverMesh.position.y, cameraPos.z);
+        if (game.state === "throwing") {
+            const cutFrom = logic.cutStart(game);
+            const cutFromWorld = fieldToWorld(cutFrom.x, cutFrom.y, 0);
+            const sideLean = THREE.MathUtils.clamp((receiverWorld.x - cutFromWorld.x) * 0.03, -0.28, 0.28);
+            receiverMesh.rotation.z = -sideLean;
+        }
     } else {
-        receiverMesh.rotation.z = 0;
         receiverMesh.lookAt(throwerWorld.x, receiverMesh.position.y, throwerWorld.z);
     }
 
@@ -490,6 +451,13 @@ function resize() {
 
 let lastTime = 0;
 let elapsed = 0;
+let holdingCatch = false;
+
+function swapPlayerMeshes() {
+    const previousThrower = throwerMesh;
+    throwerMesh = receiverMesh;
+    receiverMesh = previousThrower;
+}
 
 function frame(now) {
     if (!lastTime) {
@@ -501,7 +469,11 @@ function frame(now) {
         dt = 0.05;
     }
     elapsed += dt;
+    holdingCatch = game.state === "result" && game.result === "caught";
     logic.update(game, dt);
+    if (holdingCatch && game.state === "aiming") {
+        swapPlayerMeshes();
+    }
     updateMeter();
     placeActors(elapsed);
     updateCamera(dt);
