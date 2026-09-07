@@ -574,6 +574,7 @@ function resize() {
         camera.position.copy(cameraPos);
         camera.lookAt(cameraLook);
     }
+}
 
 let lastTime = 0;
 let elapsed = 0;
