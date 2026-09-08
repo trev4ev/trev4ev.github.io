@@ -12,6 +12,7 @@ function step(game, seconds) {
 
 function throwWithPower(power) {
     var game = logic.createGame();
+    assert.strictEqual(logic.beginCharge(game), true);
     game.power = power;
     assert.strictEqual(logic.startThrow(game), true);
     step(game, logic.THROW_DURATION + 0.001);
@@ -47,28 +48,38 @@ step(shortGame, logic.RESULT_DURATION + 0.001);
 assert.strictEqual(shortGame.state, "aiming");
 assert.strictEqual(shortGame.thrower.y, logic.THROWER_START.y);
 assert.strictEqual(shortGame.receiver.y, logic.RECEIVER_START.y);
-assert.ok(Math.abs(shortGame.power - 0.15) < 0.08);
+assert.strictEqual(shortGame.power, 0);
+assert.strictEqual(shortGame.charging, false);
 
 var aiming = logic.createGame();
+logic.update(aiming, 0.1);
+assert.strictEqual(aiming.power, 0);
+assert.strictEqual(aiming.charging, false);
+assert.strictEqual(logic.beginCharge(aiming), true);
+assert.strictEqual(aiming.charging, true);
 logic.update(aiming, 0.1);
 assert.ok(aiming.power > 0);
 assert.ok(aiming.power < 1);
 
-var bounce = logic.createGame();
-bounce.power = 0.99;
-bounce.powerDir = 1;
-logic.update(bounce, 0.1);
-assert.strictEqual(bounce.powerDir, -1);
+var fullCharge = logic.createGame();
+assert.strictEqual(logic.beginCharge(fullCharge), true);
+step(fullCharge, 1.25);
+assert.strictEqual(fullCharge.state, "throwing");
+assert.ok(fullCharge.lockedPower >= 0.999);
+assert.strictEqual(fullCharge.charging, false);
 
 assert.strictEqual(logic.startThrow(throwWithPower(0.2)), false);
 
 var cooling = logic.createGame();
 cooling.aimCooldown = logic.AIM_COOLDOWN;
-cooling.power = 0.5;
-assert.strictEqual(logic.startThrow(cooling), false);
+assert.strictEqual(logic.beginCharge(cooling), false);
 step(cooling, logic.AIM_COOLDOWN + 0.01);
-cooling.power = 0.5;
+assert.strictEqual(logic.beginCharge(cooling), true);
 assert.strictEqual(logic.startThrow(cooling), true);
+
+var noCharge = logic.createGame();
+noCharge.power = 0.5;
+assert.strictEqual(logic.startThrow(noCharge), false);
 
 var edges = logic.createGame();
 assert.strictEqual(logic.judgeLanding(edges, logic.landingForPower(edges, range.min)), "caught");
@@ -80,6 +91,7 @@ var nextThrow = throwWithPower(perfect);
 step(nextThrow, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
 assert.strictEqual(nextThrow.thrower.y, logic.THROWER_START.y);
 assert.strictEqual(nextThrow.receiver.y, logic.RECEIVER_START.y);
+assert.strictEqual(logic.beginCharge(nextThrow), true);
 nextThrow.power = (logic.goodPowerRange(nextThrow).min + logic.goodPowerRange(nextThrow).max) / 2;
 assert.strictEqual(logic.startThrow(nextThrow), true);
 step(nextThrow, logic.THROW_DURATION + 0.001);
@@ -93,6 +105,7 @@ assert.strictEqual(nextThrow.receiver.y, logic.RECEIVER_START.y);
 
 var afterCatchShort = throwWithPower(perfect);
 step(afterCatchShort, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
+assert.strictEqual(logic.beginCharge(afterCatchShort), true);
 afterCatchShort.power = 0.1;
 assert.strictEqual(logic.startThrow(afterCatchShort), true);
 step(afterCatchShort, logic.THROW_DURATION + 0.001);

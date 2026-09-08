@@ -109,14 +109,17 @@
             }
             return "Too long \u2014 turnover";
         }
-        return "Click to throw";
+        if (game.charging) {
+            return "Release to throw";
+        }
+        return "Hold to power up";
     }
 
     function createGame() {
         return {
             state: "aiming",
             power: 0,
-            powerDir: 1,
+            charging: false,
             thrower: copyPoint(THROWER_START),
             receiver: copyPoint(RECEIVER_START),
             disc: {
@@ -135,17 +138,6 @@
         };
     }
 
-    function tickPower(game, dt) {
-        game.power += game.powerDir * POWER_SPEED * dt;
-        if (game.power >= 1) {
-            game.power = 1;
-            game.powerDir = -1;
-        } else if (game.power <= 0) {
-            game.power = 0;
-            game.powerDir = 1;
-        }
-    }
-
     function updateAiming(game, dt) {
         if (game.state !== "aiming") {
             return;
@@ -153,13 +145,37 @@
         if (game.aimCooldown > 0) {
             game.aimCooldown -= dt;
         }
-        tickPower(game, dt);
+        if (game.charging) {
+            game.power = Math.min(1, game.power + POWER_SPEED * dt);
+            if (game.power >= 1) {
+                startThrow(game);
+            }
+        }
+    }
+
+    function beginCharge(game) {
+        if (game.state !== "aiming" || game.aimCooldown > 0 || game.charging) {
+            return false;
+        }
+        game.charging = true;
+        game.power = 0;
+        return true;
+    }
+
+    function cancelCharge(game) {
+        if (!game.charging || game.state !== "aiming") {
+            return false;
+        }
+        game.charging = false;
+        game.power = 0;
+        return true;
     }
 
     function startThrow(game) {
-        if (game.state !== "aiming" || game.aimCooldown > 0) {
+        if (game.state !== "aiming" || game.aimCooldown > 0 || !game.charging) {
             return false;
         }
+        game.charging = false;
         game.lockedPower = game.power;
         game.landing = landingForPower(game, game.lockedPower);
         game.throwT = 0;
@@ -208,7 +224,7 @@
         game.disc.y = game.thrower.y;
         game.disc.height = 0;
         game.power = 0;
-        game.powerDir = 1;
+        game.charging = false;
         game.lockedPower = null;
         game.landing = null;
         game.throwT = 0;
@@ -220,12 +236,10 @@
     }
 
     function restart(game) {
-        var savedPower = game.power;
-        var savedDir = game.powerDir;
         var next = createGame();
         game.state = next.state;
-        game.power = savedPower;
-        game.powerDir = savedDir;
+        game.power = 0;
+        game.charging = false;
         game.thrower = next.thrower;
         game.receiver = next.receiver;
         game.disc = next.disc;
@@ -242,10 +256,6 @@
     function updateResult(game, dt) {
         if (game.state !== "result") {
             return;
-        }
-        // Keep the power meter oscillating on misses from the throw value.
-        if (game.result !== "caught") {
-            tickPower(game, dt);
         }
         game.resultT += dt;
         if (game.resultT >= RESULT_DURATION) {
@@ -277,6 +287,8 @@
         CUT_DOWNFIELD_OFFSET: CUT_DOWNFIELD_OFFSET,
         createGame: createGame,
         update: update,
+        beginCharge: beginCharge,
+        cancelCharge: cancelCharge,
         startThrow: startThrow,
         goodPowerRange: goodPowerRange,
         landingForPower: landingForPower,

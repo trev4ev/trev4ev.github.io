@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { OutlineEffect } from "three/addons/effects/OutlineEffect.js";
+import { FontLoader } from "three/addons/loaders/FontLoader.js";
+import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 
 const logic = window.UltimateLogic;
 const canvas = document.getElementById("ultimate-field");
@@ -20,6 +22,17 @@ const ARM_REST = {
 };
 const ARM_HOLD_RIGHT = new THREE.Vector3(-1.15, BODY_CENTER + 0.16, 0.78);
 const DISC_HAND_LOCAL = new THREE.Vector3(-1.38, BODY_CENTER + 0.18, 0.92);
+const FOOT_REST = {
+    left: new THREE.Vector3(-0.5, 0.14, 0.18),
+    right: new THREE.Vector3(0.5, 0.14, 0.18)
+};
+const HIP_REST = {
+    left: new THREE.Vector3(-0.34, 0.58, 0.06),
+    right: new THREE.Vector3(0.34, 0.58, 0.06)
+};
+const legMid = new THREE.Vector3();
+const legDir = new THREE.Vector3();
+const legAxis = new THREE.Vector3(0, 1, 0);
 const handScratch = new THREE.Vector3();
 const releaseOrigin = new THREE.Vector3();
 const landingWorld = new THREE.Vector3();
@@ -177,11 +190,44 @@ scene.add(new THREE.AmbientLight(0xf0eafc, 0.75));
 
 const ground = new THREE.Mesh(
     new THREE.CircleGeometry(220, 48),
-    noOutline(new THREE.MeshLambertMaterial({ color: 0xf0eefb }))
+    noOutline(new THREE.ShadowMaterial({ opacity: 0.18 }))
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
+
+// Tron-style dashed perspective grid (local XY; ground is rotated flat onto XZ).
+(function addGroundGrid() {
+    const size = 200;
+    const divisions = 25;
+    const half = size / 2;
+    const step = size / divisions;
+    const positions = [];
+
+    for (let i = 0; i <= divisions; i++) {
+        const t = -half + i * step;
+        positions.push(-half, t, 0, half, t, 0);
+        positions.push(t, -half, 0, t, half, 0);
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+    const mat = new THREE.LineDashedMaterial({
+        color: 0x8b94d6,
+        dashSize: 0.55,
+        gapSize: 0.28,
+        transparent: true,
+        opacity: 0.58,
+        depthWrite: false
+    });
+
+    const grid = new THREE.LineSegments(geo, mat);
+    grid.computeLineDistances();
+    grid.position.z = 0.06;
+    grid.renderOrder = 1;
+    ground.add(grid);
+})();
 
 const CHAR_PALETTES = [
     {
@@ -254,7 +300,7 @@ function applyPalette(mesh, palette) {
 function makeSpike(palette) {
     const group = new THREE.Group();
     const bodyMat = glossy(palette.body);
-    const spikeMat = glossy(palette.spike);
+    const spikeMat = noOutline(glossy(palette.spike));
     const bellyMat = glossy(palette.belly);
     const leftFootMat = glossy(palette.feet);
     const rightFootMat = glossy(palette.feet);
@@ -273,7 +319,7 @@ function makeSpike(palette) {
     belly.scale.set(1.05, 0.9, 0.55);
     group.add(belly);
 
-    const spikeGeo = new THREE.ConeGeometry(0.24, 0.62, 7);
+    const spikeGeo = new THREE.ConeGeometry(0.3, 0.78, 7);
     const ico = new THREE.IcosahedronGeometry(1, 0);
     const pos = ico.getAttribute("position");
     const used = {};
@@ -295,7 +341,7 @@ function makeSpike(palette) {
         const spike = new THREE.Mesh(spikeGeo, spikeMat);
         const outward = new THREE.Vector3(x, y, z).normalize();
         spike.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), outward);
-        spike.position.copy(outward.multiplyScalar(1.05)).add(new THREE.Vector3(0, BODY_CENTER, 0));
+        spike.position.copy(outward.multiplyScalar(1.12)).add(new THREE.Vector3(0, BODY_CENTER, 0));
         spike.castShadow = true;
         group.add(spike);
     }
@@ -345,20 +391,32 @@ function makeSpike(palette) {
     rightArm.castShadow = true;
     group.add(rightArm);
 
-    const footGeo = new THREE.SphereGeometry(0.32, 12, 10);
+    const footGeo = new THREE.SphereGeometry(0.34, 12, 10);
     const leftFoot = new THREE.Mesh(footGeo, leftFootMat);
-    leftFoot.position.set(-0.42, 0.22, 0.05);
-    leftFoot.scale.set(1, 0.55, 1.15);
+    leftFoot.position.copy(FOOT_REST.left);
+    leftFoot.scale.set(1.05, 0.55, 1.25);
     leftFoot.castShadow = true;
     group.add(leftFoot);
     const rightFoot = new THREE.Mesh(footGeo, rightFootMat);
-    rightFoot.position.set(0.42, 0.22, 0.05);
-    rightFoot.scale.set(1, 0.55, 1.15);
+    rightFoot.position.copy(FOOT_REST.right);
+    rightFoot.scale.set(1.05, 0.55, 1.25);
     rightFoot.castShadow = true;
     group.add(rightFoot);
 
+    const legGeo = new THREE.CylinderGeometry(0.14, 0.18, 0.7, 10);
+    const leftLeg = new THREE.Mesh(legGeo, leftFootMat);
+    leftLeg.castShadow = true;
+    group.add(leftLeg);
+    const rightLeg = new THREE.Mesh(legGeo, rightFootMat);
+    rightLeg.castShadow = true;
+    group.add(rightLeg);
+
     group.userData.leftArm = leftArm;
     group.userData.rightArm = rightArm;
+    group.userData.leftFoot = leftFoot;
+    group.userData.rightFoot = rightFoot;
+    group.userData.leftLeg = leftLeg;
+    group.userData.rightLeg = rightLeg;
     group.userData.mats = {
         body: bodyMat,
         spike: spikeMat,
@@ -368,6 +426,8 @@ function makeSpike(palette) {
         rightFoot: rightFootMat
     };
     group.userData.palette = palette;
+    placeLeg(leftLeg, HIP_REST.left, leftFoot.position);
+    placeLeg(rightLeg, HIP_REST.right, rightFoot.position);
     return group;
 }
 
@@ -400,56 +460,200 @@ disc.add(discRim);
 disc.add(discStar);
 scene.add(disc);
 
-const METER_LENGTH = 3.4;
-const METER_WIDTH = 0.34;
-const METER_BACK = 1.15;
-const METER_RIGHT = 0.28;
-const METER_YAW = 0.42;
+const METER_HEIGHT = 2.35;
+const METER_RADIUS = 0.2;
+const METER_SIDE = 2.85;
+const METER_FORWARD = 0.2;
+const METER_MARK_RADIUS = 0.185;
+const METER_MARK_THICK = 0.05;
+const METER_SEGMENTS = 28;
+const GRID_STEP = 200 / 25;
 const CAM_SIDE = 1;
 const LOOK_X = 1;
 let camSide = CAM_SIDE;
 let lookX = LOOK_X;
 let camBack = 20;
 
+function edgeCylinder(radius, height, color, opacity) {
+    const geometry = new THREE.EdgesGeometry(
+        new THREE.CylinderGeometry(radius, radius, height, METER_SEGMENTS),
+        20
+    );
+    const material = noOutline(
+        new THREE.LineBasicMaterial({
+            color: color,
+            transparent: true,
+            opacity: opacity,
+            depthWrite: false
+        })
+    );
+    return new THREE.LineSegments(geometry, material);
+}
+
 const meterGroup = new THREE.Group();
 scene.add(meterGroup);
 
-const meterTray = new THREE.Mesh(
-    new THREE.BoxGeometry(METER_LENGTH + 0.3, 0.04, METER_WIDTH + 0.3),
-    noOutline(glossy(0xc4b6e8, { shininess: 8 }))
-);
-meterTray.receiveShadow = true;
-meterTray.position.y = 0.02;
-meterGroup.add(meterTray);
-
 const meterTrack = new THREE.Mesh(
-    new THREE.BoxGeometry(METER_LENGTH, 0.05, METER_WIDTH),
-    noOutline(glossy(0xffffff, { shininess: 18 }))
+    new THREE.CylinderGeometry(
+        METER_RADIUS * 0.92,
+        METER_RADIUS * 0.92,
+        METER_HEIGHT,
+        METER_SEGMENTS
+    ),
+    noOutline(
+        glossy(0xffffff, {
+            shininess: 18,
+            transparent: true,
+            opacity: 0.28
+        })
+    )
 );
-meterTrack.receiveShadow = true;
-meterTrack.position.y = 0.05;
+meterTrack.position.y = METER_HEIGHT / 2;
 meterGroup.add(meterTrack);
 
-const meterGood = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 0.07, METER_WIDTH * 0.78),
-    noOutline(glossy(0xa8c0f0, { emissive: 0x8fa0de, emissiveIntensity: 0.28 }))
-);
-meterGood.position.y = 0.075;
-meterGroup.add(meterGood);
+const meterShell = edgeCylinder(METER_RADIUS, METER_HEIGHT, 0x9aa0d8, 0.95);
+meterShell.position.y = METER_HEIGHT / 2;
+meterGroup.add(meterShell);
 
-const meterDial = new THREE.Mesh(
-    new THREE.BoxGeometry(0.26, 0.1, METER_WIDTH * 1.35),
+const meterGoodMin = new THREE.Mesh(
+    new THREE.CylinderGeometry(
+        METER_MARK_RADIUS,
+        METER_MARK_RADIUS,
+        METER_MARK_THICK,
+        METER_SEGMENTS
+    ),
+    noOutline(glossy(0xa8c0f0, { emissive: 0x8fa0de, emissiveIntensity: 0.32 }))
+);
+meterGroup.add(meterGoodMin);
+
+const meterGoodMax = new THREE.Mesh(
+    new THREE.CylinderGeometry(
+        METER_MARK_RADIUS,
+        METER_MARK_RADIUS,
+        METER_MARK_THICK,
+        METER_SEGMENTS
+    ),
+    noOutline(glossy(0xa8c0f0, { emissive: 0x8fa0de, emissiveIntensity: 0.32 }))
+);
+meterGroup.add(meterGoodMax);
+
+const meterFill = new THREE.Mesh(
+    new THREE.CylinderGeometry(METER_RADIUS * 0.78, METER_RADIUS * 0.78, 1, METER_SEGMENTS),
+    noOutline(glossy(0xa892de, { emissive: 0x8f74d0, emissiveIntensity: 0.32 }))
+);
+meterFill.castShadow = true;
+meterGroup.add(meterFill);
+
+function makeHelperLabel(text) {
+    const width = 1024;
+    const height = 320;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.premultiplyAlpha = true;
+    const material = noOutline(
+        new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide
+        })
+    );
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.0), material);
+    mesh.userData.canvas = canvas;
+    mesh.userData.texture = texture;
+    mesh.userData.text = "";
+    mesh.visible = false;
+    scene.add(mesh);
+    setHelperLabelText(mesh, text);
+    return mesh;
+}
+
+function setHelperLabelText(mesh, text) {
+    if (mesh.userData.text === text) {
+        return;
+    }
+    mesh.userData.text = text;
+    const canvas = mesh.userData.canvas;
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+    const lines = String(text).split("\n");
+    ctx.clearRect(0, 0, width, height);
+    ctx.font = "500 76px Nunito, Noto Sans, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const lineHeight = 88;
+    const startY = height / 2 - ((lines.length - 1) * lineHeight) / 2;
+    ctx.fillStyle = "#6b7fc4";
+    for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], width / 2, startY + i * lineHeight);
+    }
+    mesh.userData.texture.needsUpdate = true;
+}
+
+const helperLabel = makeHelperLabel("hold to power up\nrelease to throw");
+let showFirstThrowHelper = true;
+let labelFont = null;
+let streakMesh = null;
+let streakShown = -1;
+let streakAnim = 0;
+const streakMat = noOutline(
     glossy(0xa892de, { emissive: 0x8f74d0, emissiveIntensity: 0.28 })
 );
-meterDial.castShadow = true;
-meterDial.position.y = 0.08;
-const meterNeedle = new THREE.Mesh(
-    new THREE.BoxGeometry(0.1, 0.52, 0.1),
-    glossy(0x7a8fd4, { emissive: 0x6b7fc4, emissiveIntensity: 0.2 })
+
+function clearStreakMesh() {
+    if (!streakMesh) {
+        return;
+    }
+    scene.remove(streakMesh);
+    streakMesh.geometry.dispose();
+    streakMesh = null;
+    streakShown = -1;
+}
+
+function syncStreakMesh(streak) {
+    if (streak <= 0 || !labelFont) {
+        clearStreakMesh();
+        streakAnim = 0;
+        return;
+    }
+    if (streak === streakShown && streakMesh) {
+        return;
+    }
+    clearStreakMesh();
+    const geometry = new TextGeometry(String(streak), {
+        font: labelFont,
+        size: 0.9,
+        depth: 0.2,
+        curveSegments: 6,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0.02,
+        bevelOffset: 0,
+        bevelSegments: 2
+    });
+    geometry.computeBoundingBox();
+    geometry.center();
+    streakMesh = new THREE.Mesh(geometry, streakMat);
+    streakMesh.castShadow = true;
+    streakMesh.scale.setScalar(0.001);
+    scene.add(streakMesh);
+    streakShown = streak;
+    streakAnim = 0;
+}
+
+new FontLoader().load(
+    "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/fonts/helvetiker_bold.typeface.json",
+    function (font) {
+        labelFont = font;
+        if (game.streak > 0) {
+            syncStreakMesh(game.streak);
+        }
+    }
 );
-meterNeedle.position.y = 0.28;
-meterDial.add(meterNeedle);
-meterGroup.add(meterDial);
 
 function fieldToWorld(x, y, height) {
     return new THREE.Vector3(
@@ -473,7 +677,9 @@ const missHoldCam = new THREE.Vector3();
 const missHoldLook = new THREE.Vector3();
 const resetCam = new THREE.Vector3();
 const resetLook = new THREE.Vector3();
-const PARK = new THREE.Vector3(0, -80, 0);
+const meterYawScratch = new THREE.Euler();
+const meterOffset = new THREE.Vector3();
+const meterUp = new THREE.Vector3(0, 1, 0);
 const MISS_PAUSE = 0.5;
 const MISS_PAN = 1.1;
 const MISS_DISC_OUT_END = 0.55;
@@ -491,6 +697,47 @@ function lookAtFlat(quat, from, toX, toZ) {
 
 function poseArm(arm, rest, hold, amount) {
     arm.position.lerpVectors(rest, hold, amount);
+}
+
+function resetFeet(mesh) {
+    mesh.userData.leftFoot.position.copy(FOOT_REST.left);
+    mesh.userData.rightFoot.position.copy(FOOT_REST.right);
+    mesh.userData.leftFoot.rotation.set(0, 0, 0);
+    mesh.userData.rightFoot.rotation.set(0, 0, 0);
+    syncLegs(mesh);
+}
+
+function syncLegs(mesh) {
+    placeLeg(mesh.userData.leftLeg, HIP_REST.left, mesh.userData.leftFoot.position);
+    placeLeg(mesh.userData.rightLeg, HIP_REST.right, mesh.userData.rightFoot.position);
+}
+
+function placeLeg(leg, hip, foot) {
+    legMid.addVectors(hip, foot).multiplyScalar(0.5);
+    leg.position.copy(legMid);
+    legDir.subVectors(foot, hip);
+    const len = Math.max(0.25, legDir.length());
+    leg.scale.set(1, len / 0.7, 1);
+    leg.quaternion.setFromUnitVectors(legAxis, legDir.normalize());
+}
+
+function poseRun(mesh, phase, amount) {
+    const stride = Math.sin(phase);
+    const leftLift = Math.max(0, stride);
+    const rightLift = Math.max(0, -stride);
+    mesh.userData.leftFoot.position.set(
+        FOOT_REST.left.x,
+        FOOT_REST.left.y + leftLift * 0.26 * amount,
+        FOOT_REST.left.z + stride * 0.4 * amount
+    );
+    mesh.userData.rightFoot.position.set(
+        FOOT_REST.right.x,
+        FOOT_REST.right.y + rightLift * 0.26 * amount,
+        FOOT_REST.right.z - stride * 0.4 * amount
+    );
+    mesh.userData.leftFoot.rotation.x = -stride * 0.65 * amount;
+    mesh.userData.rightFoot.rotation.x = stride * 0.65 * amount;
+    syncLegs(mesh);
 }
 
 function placeDiscInRightHand(mesh, target) {
@@ -519,7 +766,7 @@ function updateMeter() {
     root.dataset.result = game.result || "";
 }
 
-function placeActors(elapsed) {
+function placeActors(elapsed, dt = 0) {
     const approach = outlineApproach();
     setOutlineThickness(throwerMesh, outlineThickness(approach));
     setOutlineThickness(receiverMesh, outlineThickness(1 - approach));
@@ -546,8 +793,11 @@ function placeActors(elapsed) {
     }
     const dir = logic.throwDirection(game);
     const missDiscIn = miss && game.resultT >= MISS_DISC_IN_START;
+    const introRunning = aiming && receiverIntro > 0;
+    const receiverRunning = throwing || introRunning;
+    const runPhase = elapsed * 12;
     const bob = aiming || missDiscIn ? Math.sin(elapsed * 2.4) * 0.08 : 0;
-    const runBob = throwing ? Math.abs(Math.sin(elapsed * 10)) * 0.16 : 0;
+    const runBob = receiverRunning ? Math.abs(Math.sin(runPhase)) * 0.14 : 0;
     const flight = Math.max(0, Math.min(1, game.throwT || 0));
     let discLift = 1.78;
     if (throwing) {
@@ -565,6 +815,12 @@ function placeActors(elapsed) {
         showActor(throwerMesh);
         throwerMesh.position.copy(throwerWorld);
         throwerMesh.position.y = ACTOR_HOVER + bob;
+        if (loadIntro > 0) {
+            const appear = 1 - loadIntro;
+            const easedAppear = appear * appear * (3 - 2 * appear);
+            // Rise out of the ground rather than fading in place.
+            throwerMesh.position.y = ACTOR_HOVER + bob - (1 - easedAppear) * 2.6;
+        }
         if (catchTurn > 0) {
             const turnProgress = 1 - catchTurn;
             const eased = turnProgress * turnProgress * (3 - 2 * turnProgress);
@@ -578,28 +834,57 @@ function placeActors(elapsed) {
 
     showActor(receiverMesh);
     receiverMesh.position.copy(receiverWorld);
-    receiverMesh.position.y = ACTOR_HOVER + runBob + (aiming && receiverIntro > 0 ? (1 - receiverIntro) * 0.08 : 0);
+    receiverMesh.position.y = ACTOR_HOVER + runBob + (introRunning ? (1 - receiverIntro) * 0.08 : 0);
 
     downfieldPoint.set(receiverWorld.x, receiverWorld.y, receiverWorld.z + dir * 16);
-    if (throwing) {
-        receiverMesh.lookAt(cameraPos.x, receiverMesh.position.y, cameraPos.z);
-        const cutFrom = logic.cutStart(game);
-        const cutFromWorld = fieldToWorld(cutFrom.x, cutFrom.y, 0);
+    // Smooth left yaw in/out so run facing doesn't snap.
+    const targetFaceYaw = throwing ? 0.72 : introRunning ? 0.85 : 0;
+    if (dt > 0) {
+        receiverFaceYaw = THREE.MathUtils.damp(receiverFaceYaw, targetFaceYaw, 7, dt);
+    }
+    const lookBlend = Math.max(0, Math.min(1, receiverFaceYaw / 0.85));
+    const cutFrom = logic.cutStart(game);
+    const cutFromWorld = fieldToWorld(cutFrom.x, cutFrom.y, 0);
+    const cutLookX = THREE.MathUtils.lerp(cutFromWorld.x, receiverWorld.x, 0.35);
+    const cutLookZ = THREE.MathUtils.lerp(throwerWorld.z, cameraPos.z, 0.35);
+    // Blend cut aim only while throwing; intro keeps eyes on the thrower.
+    const runLookX = THREE.MathUtils.lerp(throwerWorld.x, cutLookX, throwing ? lookBlend : 0);
+    const runLookZ = THREE.MathUtils.lerp(throwerWorld.z, cutLookZ, throwing ? lookBlend : 0);
+    receiverMesh.lookAt(runLookX, receiverMesh.position.y, runLookZ);
+    if (receiverFaceYaw > 0.0005) {
+        receiverMesh.rotateY(-receiverFaceYaw);
+    }
+    if (lookBlend > 0.01) {
         const sideLean = THREE.MathUtils.clamp((receiverWorld.x - cutFromWorld.x) * 0.03, -0.28, 0.28);
-        receiverMesh.rotateZ(-sideLean);
-    } else {
-        receiverMesh.lookAt(throwerWorld.x, receiverMesh.position.y, throwerWorld.z);
+        receiverMesh.rotateZ(-sideLean * (throwing ? lookBlend : 0));
     }
 
     const armWave = Math.sin(elapsed * 2.2) * 0.18;
     const catchReach = throwing ? Math.max(0, Math.min(1, (flight - 0.62) / 0.38)) : 0;
+    const runSwing = Math.sin(runPhase);
     let throwArm = 0;
-    if (aiming || missDiscIn || catchTurn > 0) {
+    if (aiming || missDiscIn || catchTurn > 0 || loadIntro > 0) {
         poseArm(throwerMesh.userData.rightArm, ARM_REST.right, ARM_HOLD_RIGHT, 1);
         throwerMesh.userData.leftArm.position.copy(ARM_REST.left);
         throwerMesh.userData.leftArm.position.y = ARM_REST.left.y - armWave * 0.4;
-        poseArm(receiverMesh.userData.rightArm, ARM_REST.right, ARM_REST.right, 0);
-        poseArm(receiverMesh.userData.leftArm, ARM_REST.left, ARM_REST.left, 0);
+        if (introRunning) {
+            receiverMesh.userData.leftArm.position.set(
+                ARM_REST.left.x,
+                ARM_REST.left.y + runSwing * 0.28,
+                ARM_REST.left.z - runSwing * 0.35
+            );
+            receiverMesh.userData.rightArm.position.set(
+                ARM_REST.right.x,
+                ARM_REST.right.y - runSwing * 0.28,
+                ARM_REST.right.z + runSwing * 0.35
+            );
+            poseRun(receiverMesh, runPhase, 1);
+        } else {
+            poseArm(receiverMesh.userData.rightArm, ARM_REST.right, ARM_REST.right, 0);
+            poseArm(receiverMesh.userData.leftArm, ARM_REST.left, ARM_REST.left, 0);
+            resetFeet(receiverMesh);
+        }
+        resetFeet(throwerMesh);
     } else if (throwing) {
         // Hold through a short whip, then follow through / retract.
         if (flight < 0.05) {
@@ -612,16 +897,29 @@ function placeActors(elapsed) {
         poseArm(throwerMesh.userData.rightArm, ARM_REST.right, ARM_HOLD_RIGHT, throwArm);
         throwerMesh.userData.leftArm.position.copy(ARM_REST.left);
         throwerMesh.userData.leftArm.position.y = ARM_REST.left.y - armWave * 0.4;
+        resetFeet(throwerMesh);
+        // Receiver runs with alternating legs and opposite arm swing.
+        const reachMix = 1 - catchReach;
+        receiverMesh.userData.leftArm.position.set(
+            ARM_REST.left.x,
+            ARM_REST.left.y + runSwing * 0.32 * reachMix + catchReach * 0.12,
+            ARM_REST.left.z - runSwing * 0.4 * reachMix
+        );
         poseArm(receiverMesh.userData.rightArm, ARM_REST.right, ARM_HOLD_RIGHT, catchReach);
-        receiverMesh.userData.leftArm.position.copy(ARM_REST.left);
-        receiverMesh.userData.leftArm.position.y = ARM_REST.left.y + runBob * 0.8;
+        if (catchReach < 1) {
+            receiverMesh.userData.rightArm.position.y += -runSwing * 0.32 * reachMix;
+            receiverMesh.userData.rightArm.position.z += runSwing * 0.4 * reachMix;
+        }
+        poseRun(receiverMesh, runPhase, Math.max(0.35, reachMix));
     } else {
         if (throwerMesh.visible) {
             poseArm(throwerMesh.userData.rightArm, ARM_REST.right, ARM_REST.right, 0);
             poseArm(throwerMesh.userData.leftArm, ARM_REST.left, ARM_REST.left, 0);
+            resetFeet(throwerMesh);
         }
         poseArm(receiverMesh.userData.rightArm, ARM_REST.right, ARM_REST.right, 0);
         poseArm(receiverMesh.userData.leftArm, ARM_REST.left, ARM_REST.left, 0);
+        resetFeet(receiverMesh);
     }
 
     if (aiming || caught) {
@@ -704,32 +1002,114 @@ function placeActors(elapsed) {
     }
     if (throwerMesh.visible) {
         setActorOpacity(throwerMesh, 1);
+        if (loadIntro > 0) {
+            const appear = 1 - loadIntro;
+            const easedAppear = appear * appear * (3 - 2 * appear);
+            // Disc follows the rise; keep fully opaque once mostly emerged.
+            setDiscOpacity(easedAppear > 0.35 ? 1 : easedAppear / 0.35);
+        }
+    }
+    if (helperLabel.visible) {
+        const helperAppear =
+            loadIntro > 0
+                ? Math.max(0, (1 - loadIntro) * (1 - loadIntro) * (3 - 2 * (1 - loadIntro)))
+                : 1;
+        helperLabel.material.opacity = helperAppear;
     }
 
     const range = logic.goodPowerRange(game);
+    const targetPower = throwing
+        ? game.lockedPower != null
+            ? game.lockedPower
+            : game.power
+        : miss
+          ? 0
+          : game.power;
+    if (dt > 0) {
+        if ((aiming && game.charging) || throwing) {
+            meterVisualPower = targetPower;
+        } else {
+            meterVisualPower = THREE.MathUtils.damp(meterVisualPower, targetPower, 5.5, dt);
+            if (meterVisualPower < 0.004) {
+                meterVisualPower = 0;
+            }
+        }
+    }
+    const syncMeterFill = (power) => {
+        const fill = Math.max(0.001, power);
+        meterFill.scale.y = fill * METER_HEIGHT;
+        meterFill.position.y = (fill * METER_HEIGHT) / 2;
+        meterGoodMin.position.y = range.min * METER_HEIGHT;
+        meterGoodMax.position.y = range.max * METER_HEIGHT;
+    };
+    const placeMeterOnGround = () => {
+        // Ground beside thrower, further to their right, matching their yaw.
+        const yaw = throwerMesh.visible
+            ? meterYawScratch.setFromQuaternion(throwerMesh.quaternion, "YXZ").y
+            : 0;
+        meterGroup.rotation.set(0, yaw, 0);
+        // Local -X is anatomical right (lookAt mirrors +X).
+        meterOffset.set(-METER_SIDE, 0, METER_FORWARD);
+        meterOffset.applyAxisAngle(meterUp, yaw);
+        meterGroup.position.set(
+            throwerWorld.x + meterOffset.x,
+            0.02,
+            throwerWorld.z + meterOffset.z
+        );
+    };
     if (aiming) {
         meterGroup.visible = true;
+        // Grow in from the bottom (group origin is at the base).
         const grow = meterIntro * meterIntro * (3 - 2 * meterIntro);
-        const meterLen = METER_LENGTH * Math.max(0.001, grow);
-        meterGroup.scale.set(Math.max(0.001, grow), 1, 1);
-        meterGroup.position.set(
-            throwerWorld.x + METER_RIGHT + meterLen / 2,
-            0,
-            throwerWorld.z - dir * METER_BACK
-        );
-        meterGroup.rotation.y = -dir * METER_YAW;
-        const goodLen = Math.max(0.2, (range.max - range.min) * METER_LENGTH);
-        meterGood.scale.x = goodLen;
-        meterGood.position.x = ((range.min + range.max) / 2 - 0.5) * METER_LENGTH;
-        meterDial.position.x = (game.power - 0.5) * METER_LENGTH;
+        meterGroup.scale.set(1, Math.max(0.001, grow), 1);
+        placeMeterOnGround();
+        syncMeterFill(meterVisualPower);
     } else if (throwing || miss) {
-        // Keep the previous meter in world space and keep the dial moving on misses.
         meterGroup.visible = true;
-        if (miss) {
-            meterDial.position.x = (game.power - 0.5) * METER_LENGTH;
-        }
+        meterGroup.scale.set(1, 1, 1);
+        placeMeterOnGround();
+        syncMeterFill(meterVisualPower);
     } else {
         meterGroup.visible = false;
+    }
+
+    // Helper until the first successful catch — stays through throws and misses.
+    if (caught) {
+        showFirstThrowHelper = false;
+    }
+    if (showFirstThrowHelper && throwerMesh.visible && !caught) {
+        helperLabel.visible = true;
+        // Billboard on the first grid line toward the camera, centered on the thrower.
+        // Ground grid step is 8; toward camera is +Z from the thrower (dir is downfield).
+        helperLabel.position.set(
+            throwerWorld.x + GRID_STEP / 8,
+            0.75,
+            throwerWorld.z + GRID_STEP * -dir / 2
+        );
+        helperLabel.up.set(0, 1, 0);
+        helperLabel.lookAt(cameraPos.x, helperLabel.position.y, cameraPos.z);
+    } else {
+        helperLabel.visible = false;
+    }
+
+    syncStreakMesh(game.streak);
+    if (streakMesh && throwerMesh.visible && game.streak > 0 && !caught) {
+        streakMesh.visible = true;
+        if (dt > 0) {
+            streakAnim = Math.min(1, streakAnim + dt * 3.2);
+        }
+        const pop = streakAnim * streakAnim * (3 - 2 * streakAnim);
+        const rise = 0.55 + pop * 0.6;
+        // Screen-left of the thrower; face the camera, don't follow body yaw.
+        streakMesh.position.set(
+            throwerWorld.x - METER_SIDE * 0.82,
+            rise,
+            throwerWorld.z
+        );
+        streakMesh.lookAt(cameraPos.x, streakMesh.position.y, cameraPos.z);
+        streakMesh.scale.setScalar(Math.max(0.001, 0.15 + pop * 0.85));
+    } else if (streakMesh) {
+        streakMesh.visible = false;
     }
 
     const anchor = caught ? receiverWorld : throwerWorld;
@@ -834,7 +1214,7 @@ function resize() {
     canvas.style.height = "100%";
     outline.setSize(width, height);
     if (elapsed) {
-        placeActors(elapsed);
+        placeActors(elapsed, 0);
         cameraPos.copy(desiredCam);
         cameraLook.copy(desiredLook);
         camera.position.copy(cameraPos);
@@ -844,9 +1224,12 @@ function resize() {
 
 let lastTime = 0;
 let elapsed = 0;
-let receiverIntro = 0;
-let meterIntro = 1;
+let receiverIntro = 1;
+let meterIntro = 0;
+let meterVisualPower = 0;
 let catchTurn = 0;
+let loadIntro = 1;
+let receiverFaceYaw = 0;
 let prevGameState = game.state;
 
 function recycleCatcherAsThrower(catcherX, catcherY) {
@@ -877,7 +1260,11 @@ function recycleCatcherAsThrower(catcherX, catcherY) {
     setDiscOpacity(1);
     receiverIntro = 1;
     meterIntro = 0;
+    meterVisualPower = 0;
     catchTurn = 1;
+    receiverFaceYaw = 0;
+    showFirstThrowHelper = false;
+    streakAnim = 0;
 }
 
 function frame(now) {
@@ -911,7 +1298,14 @@ function frame(now) {
         missHoldLook.copy(cameraLook);
     }
     prevGameState = game.state;
-    if (catchTurn > 0) {
+    if (loadIntro > 0) {
+        // Match #content fade-in (1.5s) from main.css.
+        loadIntro = Math.max(0, loadIntro - dt / 1.5);
+        const turnProgress = 1 - loadIntro;
+        const eased = turnProgress * turnProgress * (3 - 2 * turnProgress);
+        meterIntro = eased;
+        receiverIntro = 1 - eased;
+    } else if (catchTurn > 0) {
         catchTurn = Math.max(0, catchTurn - dt * 1.15);
         const turnProgress = 1 - catchTurn;
         const eased = turnProgress * turnProgress * (3 - 2 * turnProgress);
@@ -919,22 +1313,111 @@ function frame(now) {
         receiverIntro = 1 - eased;
     }
     updateMeter();
-    placeActors(elapsed);
+    placeActors(elapsed, dt);
     updateCamera(dt);
     outline.render(scene, camera);
     requestAnimationFrame(frame);
 }
 
-function tryThrow(event) {
+function onPointerCancel() {
+    logic.cancelCharge(game);
+}
+
+const hitProj = new THREE.Vector3();
+const hitScreen = { x: 0, y: 0 };
+
+function projectWorldToClient(x, y, z, target) {
+    hitProj.set(x, y, z).project(camera);
+    const rect = canvas.getBoundingClientRect();
+    target.x = (hitProj.x * 0.5 + 0.5) * rect.width + rect.left;
+    target.y = (-hitProj.y * 0.5 + 0.5) * rect.height + rect.top;
+    return hitProj.z > -1 && hitProj.z < 1;
+}
+
+function isThrowControlHit(clientX, clientY) {
+    if (game.state !== "aiming" || catchTurn > 0 || loadIntro > 0 || !throwerMesh.visible) {
+        return false;
+    }
+    const points = [
+        {
+            x: throwerWorld.x,
+            y: ACTOR_HOVER + BODY_CENTER,
+            z: throwerWorld.z,
+            radius: 88
+        },
+        {
+            x: throwerWorld.x,
+            y: ACTOR_HOVER + 0.4,
+            z: throwerWorld.z,
+            radius: 72
+        }
+    ];
+    if (meterGroup.visible) {
+        points.push(
+            {
+                x: meterGroup.position.x,
+                y: meterGroup.position.y + METER_HEIGHT * 0.35,
+                z: meterGroup.position.z,
+                radius: 64
+            },
+            {
+                x: meterGroup.position.x,
+                y: meterGroup.position.y + METER_HEIGHT * 0.75,
+                z: meterGroup.position.z,
+                radius: 64
+            }
+        );
+    }
+    for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        if (!projectWorldToClient(p.x, p.y, p.z, hitScreen)) {
+            continue;
+        }
+        const dx = clientX - hitScreen.x;
+        const dy = clientY - hitScreen.y;
+        if (dx * dx + dy * dy <= p.radius * p.radius) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function onPointerDown(event) {
     if (event.target.closest && event.target.closest("a")) {
         return;
     }
-    if (catchTurn > 0) {
+    if (catchTurn > 0 || loadIntro > 0) {
+        return;
+    }
+    if (!isThrowControlHit(event.clientX, event.clientY)) {
+        return;
+    }
+    if (logic.beginCharge(game)) {
+        event.preventDefault();
+        try {
+            canvas.setPointerCapture(event.pointerId);
+        } catch (err) {
+            // Ignore capture failures on unsupported targets.
+        }
+    }
+}
+
+function onPointerUp(event) {
+    if (event.target.closest && event.target.closest("a")) {
         return;
     }
     if (logic.startThrow(game)) {
         event.preventDefault();
     }
+}
+
+function onPointerMove(event) {
+    if (game.charging) {
+        return;
+    }
+    canvas.style.cursor = isThrowControlHit(event.clientX, event.clientY)
+        ? "pointer"
+        : "default";
 }
 
 resize();
@@ -944,7 +1427,10 @@ cameraPos.copy(desiredCam);
 cameraLook.copy(desiredLook);
 camera.position.copy(cameraPos);
 camera.lookAt(cameraLook);
-root.addEventListener("pointerdown", tryThrow);
+canvas.addEventListener("pointerdown", onPointerDown);
+canvas.addEventListener("pointerup", onPointerUp);
+canvas.addEventListener("pointercancel", onPointerCancel);
+canvas.addEventListener("pointermove", onPointerMove);
 window.addEventListener("resize", resize);
 if (window.ResizeObserver) {
     new ResizeObserver(resize).observe(canvas.parentElement || canvas);

@@ -13,6 +13,10 @@ html, body {
     height: 100dvh;
     overflow: hidden;
     -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 body {
@@ -116,7 +120,10 @@ p {
     height: 100dvh;
     text-align: center;
     user-select: none;
-    cursor: pointer;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    cursor: default;
     z-index: 1;
 }
 
@@ -128,6 +135,8 @@ p {
     border-radius: 0;
     background: #f0eefb;
     box-shadow: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #ultimate-field {
@@ -136,8 +145,12 @@ p {
     display: block;
     width: 100% !important;
     height: 100% !important;
-    cursor: pointer;
-    touch-action: manipulation;
+    cursor: default;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 @media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
