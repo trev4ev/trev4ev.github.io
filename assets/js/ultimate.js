@@ -1205,8 +1205,8 @@ function resize() {
     const portrait = width / height < 0.78;
     camSide = portrait ? 0 : CAM_SIDE;
     lookX = portrait ? 0 : LOOK_X;
-    camBack = portrait ? 23 : 20;
-    camera.fov = portrait ? 50 : 42;
+    camBack = portrait ? 17 : 20;
+    camera.fov = portrait ? 40 : 42;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
