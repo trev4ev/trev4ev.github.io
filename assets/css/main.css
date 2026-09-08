@@ -155,7 +155,7 @@ p {
 
 @media only screen and (max-width: 760px), only screen and (max-device-width: 760px) {
     #content {
-        top: max(56px, env(safe-area-inset-top, 0px) + 44px);
+        top: max(72px, env(safe-area-inset-top, 0px) + 56px);
         left: 0;
         right: 0;
         margin-left: auto;
