@@ -21,7 +21,13 @@ const ARM_REST = {
     right: new THREE.Vector3(-1.18, BODY_CENTER - 0.05, 0.2)
 };
 const ARM_HOLD_RIGHT = new THREE.Vector3(-1.15, BODY_CENTER + 0.16, 0.78);
+const ARM_WAVE = new THREE.Vector3(1.42, BODY_CENTER + 0.92, 0.42);
+const ARM_HANDS_UP_LEFT = new THREE.Vector3(1.25, BODY_CENTER + 1.08, 0.32);
+const ARM_HANDS_UP_RIGHT = new THREE.Vector3(-1.25, BODY_CENTER + 1.08, 0.32);
+const ARM_TUCK_LEFT = new THREE.Vector3(0.72, BODY_CENTER + 0.22, 0.55);
+const ARM_TUCK_RIGHT = new THREE.Vector3(-0.72, BODY_CENTER + 0.22, 0.55);
 const DISC_HAND_LOCAL = new THREE.Vector3(-1.38, BODY_CENTER + 0.18, 0.92);
+const DISC_ARM_OFFSET = new THREE.Vector3().subVectors(DISC_HAND_LOCAL, ARM_HOLD_RIGHT);
 const FOOT_REST = {
     left: new THREE.Vector3(-0.5, 0.14, 0.18),
     right: new THREE.Vector3(0.5, 0.14, 0.18)
@@ -677,11 +683,10 @@ const missHoldCam = new THREE.Vector3();
 const missHoldLook = new THREE.Vector3();
 const resetCam = new THREE.Vector3();
 const resetLook = new THREE.Vector3();
-const meterYawScratch = new THREE.Euler();
-const meterOffset = new THREE.Vector3();
-const meterUp = new THREE.Vector3(0, 1, 0);
 const MISS_PAUSE = 0.5;
 const MISS_PAN = 1.1;
+// Keep MISS_PAUSE + MISS_PAN in sync with UltimateLogic.RESULT_DURATION so
+// aiming unlocks as soon as the camera finishes returning.
 const MISS_DISC_OUT_END = 0.55;
 const MISS_DISC_IN_START = 0.7;
 const MISS_DISC_IN_END = 1.35;
@@ -699,6 +704,148 @@ function poseArm(arm, rest, hold, amount) {
     arm.position.lerpVectors(rest, hold, amount);
 }
 
+const CAMERA_IDLE_ANIMS = ["wave", "sway", "discShow", "spin", "backflip"];
+const CAMERA_IDLE_DURATION = {
+    wave: 2.6,
+    sway: 2.8,
+    discShow: 2.8,
+    spin: 2.15,
+    backflip: 1.7
+};
+const CAMERA_IDLE_PAUSE_MIN = 2.2;
+const CAMERA_IDLE_PAUSE_MAX = 4.5;
+const PASSIVE_IDLE_DELAY = 5;
+let cameraIdleAnim = "stand";
+let cameraIdleT = 0;
+let cameraIdleDuration = 2.8;
+let idleReturnTurn = 0;
+let lastActiveAt = 0;
+
+function cameraIdleProgress() {
+    return Math.min(1, cameraIdleT / Math.max(0.001, cameraIdleDuration));
+}
+
+function smoothstep(edge0, edge1, x) {
+    const t = Math.max(0, Math.min(1, (x - edge0) / Math.max(0.0001, edge1 - edge0)));
+    return t * t * (3 - 2 * t);
+}
+
+// Stunt motion finishes early so the last beat can settle into a stand.
+function cameraIdleActionT(t) {
+    return smoothstep(0, 0.72, t);
+}
+
+// Pose intensity: ease in, hold, then ease back to the default stand.
+function cameraIdlePoseBlend(t) {
+    if (t < 0.14) {
+        return smoothstep(0, 0.14, t);
+    }
+    if (t < 0.7) {
+        return 1;
+    }
+    return 1 - smoothstep(0.7, 0.95, t);
+}
+
+function applyDefaultStandPose(mesh, elapsed) {
+    const breath = Math.sin(elapsed * 2.1) * 0.04;
+    poseArm(mesh.userData.rightArm, ARM_REST.right, ARM_HOLD_RIGHT, 0.94 + breath * 0.4);
+    mesh.userData.leftArm.position.copy(ARM_REST.left);
+    mesh.userData.leftArm.position.y = ARM_REST.left.y - breath * 2.2;
+    resetFeet(mesh);
+}
+
+function pickCameraIdleAnim() {
+    if (cameraIdleAnim !== "stand") {
+        // Pause in the default stand between flourishes.
+        cameraIdleAnim = "stand";
+        cameraIdleDuration =
+            CAMERA_IDLE_PAUSE_MIN +
+            Math.random() * (CAMERA_IDLE_PAUSE_MAX - CAMERA_IDLE_PAUSE_MIN);
+        cameraIdleT = 0;
+        return;
+    }
+    const options = CAMERA_IDLE_ANIMS.filter((name) => name !== cameraIdleAnim);
+    cameraIdleAnim = options[Math.floor(Math.random() * options.length)];
+    cameraIdleDuration = CAMERA_IDLE_DURATION[cameraIdleAnim] || 2.5;
+    cameraIdleT = 0;
+}
+
+function applyCameraIdlePose(mesh, elapsed) {
+    if (cameraIdleAnim === "stand") {
+        applyDefaultStandPose(mesh, elapsed);
+        return;
+    }
+
+    const t = cameraIdleProgress();
+    const blend = cameraIdlePoseBlend(t);
+    const left = mesh.userData.leftArm;
+    const right = mesh.userData.rightArm;
+
+    // Always lean toward the default disc-hold so outros settle cleanly.
+    applyDefaultStandPose(mesh, elapsed);
+
+    if (cameraIdleAnim === "wave") {
+        poseArm(left, ARM_REST.left, ARM_WAVE, blend);
+        left.position.x += Math.sin(elapsed * 9) * 0.38 * blend;
+        left.position.y += Math.sin(elapsed * 9 + 0.6) * 0.08 * blend;
+        resetFeet(mesh);
+    } else if (cameraIdleAnim === "sway") {
+        left.position.set(
+            ARM_REST.left.x + Math.sin(elapsed * 1.7) * 0.12 * blend,
+            ARM_REST.left.y + Math.sin(elapsed * 2.1) * 0.1 * blend,
+            ARM_REST.left.z + 0.08 * blend
+        );
+        right.position.y += Math.sin(elapsed * 1.7 + 1) * 0.06 * blend;
+        mesh.userData.leftFoot.position.set(
+            FOOT_REST.left.x + Math.sin(elapsed * 1.7) * 0.05 * blend,
+            FOOT_REST.left.y,
+            FOOT_REST.left.z
+        );
+        mesh.userData.rightFoot.position.set(
+            FOOT_REST.right.x + Math.sin(elapsed * 1.7 + Math.PI) * 0.05 * blend,
+            FOOT_REST.right.y,
+            FOOT_REST.right.z
+        );
+        syncLegs(mesh);
+    } else if (cameraIdleAnim === "discShow") {
+        left.position.y += Math.sin(elapsed * 2.2) * 0.06 * blend;
+        const tip = (0.5 + Math.sin(elapsed * 3.4) * 0.5) * blend;
+        right.position.set(
+            ARM_HOLD_RIGHT.x - tip * 0.08,
+            ARM_HOLD_RIGHT.y + tip * 0.55,
+            ARM_HOLD_RIGHT.z + tip * 0.28
+        );
+        resetFeet(mesh);
+    } else if (cameraIdleAnim === "spin") {
+        left.position.lerpVectors(ARM_REST.left, ARM_HANDS_UP_LEFT, blend);
+        right.position.lerpVectors(ARM_HOLD_RIGHT, ARM_HANDS_UP_RIGHT, blend);
+        resetFeet(mesh);
+    } else if (cameraIdleAnim === "backflip") {
+        left.position.lerpVectors(ARM_REST.left, ARM_TUCK_LEFT, blend);
+        right.position.lerpVectors(ARM_HOLD_RIGHT, ARM_TUCK_RIGHT, blend);
+        resetFeet(mesh);
+    }
+}
+
+function updateCameraIdleAnim(dt) {
+    cameraIdleT += dt;
+    if (cameraIdleT >= cameraIdleDuration) {
+        pickCameraIdleAnim();
+    }
+}
+
+function markUserActive() {
+    lastActiveAt = elapsed;
+}
+
+function beginPassiveCameraIdle() {
+    faceCameraIdle = true;
+    idleReturnTurn = 1;
+    cameraIdleAnim = "stand";
+    cameraIdleDuration =
+        CAMERA_IDLE_PAUSE_MIN + Math.random() * (CAMERA_IDLE_PAUSE_MAX - CAMERA_IDLE_PAUSE_MIN);
+    cameraIdleT = 0;
+}
 function resetFeet(mesh) {
     mesh.userData.leftFoot.position.copy(FOOT_REST.left);
     mesh.userData.rightFoot.position.copy(FOOT_REST.right);
@@ -742,7 +889,8 @@ function poseRun(mesh, phase, amount) {
 
 function placeDiscInRightHand(mesh, target) {
     mesh.updateMatrixWorld(true);
-    target.copy(DISC_HAND_LOCAL);
+    // Follow the right-hand orb so idle presents (disc show / spin) keep the disc attached.
+    target.copy(mesh.userData.rightArm.position).add(DISC_ARM_OFFSET);
     mesh.localToWorld(target);
 }
 
@@ -821,12 +969,40 @@ function placeActors(elapsed, dt = 0) {
             // Rise out of the ground rather than fading in place.
             throwerMesh.position.y = ACTOR_HOVER + bob - (1 - easedAppear) * 2.6;
         }
-        if (catchTurn > 0) {
-            const turnProgress = 1 - catchTurn;
+        if (catchTurn > 0 || openTurn > 0) {
+            const turn = catchTurn > 0 ? catchTurn : openTurn;
+            const turnProgress = 1 - turn;
             const eased = turnProgress * turnProgress * (3 - 2 * turnProgress);
             lookAtFlat(lookFrom, throwerWorld, cameraPos.x, cameraPos.z);
             lookAtFlat(lookTo, throwerWorld, receiverWorld.x, receiverWorld.z);
             throwerMesh.quaternion.slerpQuaternions(lookFrom, lookTo, eased);
+        } else if (idleReturnTurn > 0) {
+            const turnProgress = 1 - idleReturnTurn;
+            const eased = turnProgress * turnProgress * (3 - 2 * turnProgress);
+            lookAtFlat(lookFrom, throwerWorld, cameraPos.x, cameraPos.z);
+            lookAtFlat(lookTo, throwerWorld, receiverWorld.x, receiverWorld.z);
+            // Turn from field-facing back to the camera.
+            throwerMesh.quaternion.slerpQuaternions(lookTo, lookFrom, eased);
+        } else if (faceCameraIdle || loadIntro > 0) {
+            lookAtFlat(lookFrom, throwerWorld, cameraPos.x, cameraPos.z);
+            throwerMesh.quaternion.copy(lookFrom);
+            const idleT = cameraIdleProgress();
+            const actionT = cameraIdleActionT(idleT);
+            if (cameraIdleAnim === "spin" && faceCameraIdle) {
+                throwerMesh.rotateY(actionT * Math.PI * 2);
+            } else if (cameraIdleAnim === "backflip" && faceCameraIdle) {
+                const jump = Math.sin(actionT * Math.PI) * 2.1;
+                throwerMesh.position.y += jump;
+                throwerMesh.rotateX(-actionT * Math.PI * 2);
+            } else if (
+                faceCameraIdle &&
+                loadIntro <= 0 &&
+                !game.charging &&
+                cameraIdleAnim !== "stand"
+            ) {
+                // Soft lean while greeting the camera.
+                throwerMesh.rotateZ(Math.sin(elapsed * 1.5) * 0.045 * cameraIdlePoseBlend(idleT));
+            }
         } else {
             throwerMesh.lookAt(receiverWorld.x, throwerMesh.position.y, receiverWorld.z);
         }
@@ -862,11 +1038,21 @@ function placeActors(elapsed, dt = 0) {
     const armWave = Math.sin(elapsed * 2.2) * 0.18;
     const catchReach = throwing ? Math.max(0, Math.min(1, (flight - 0.62) / 0.38)) : 0;
     const runSwing = Math.sin(runPhase);
+    const cameraGreeting =
+        faceCameraIdle && !game.charging && openTurn <= 0 && idleReturnTurn <= 0 && loadIntro < 0.45;
     let throwArm = 0;
     if (aiming || missDiscIn || catchTurn > 0 || loadIntro > 0) {
-        poseArm(throwerMesh.userData.rightArm, ARM_REST.right, ARM_HOLD_RIGHT, 1);
-        throwerMesh.userData.leftArm.position.copy(ARM_REST.left);
-        throwerMesh.userData.leftArm.position.y = ARM_REST.left.y - armWave * 0.4;
+        if (cameraGreeting) {
+            if (dt > 0) {
+                updateCameraIdleAnim(dt);
+            }
+            applyCameraIdlePose(throwerMesh, elapsed);
+        } else {
+            poseArm(throwerMesh.userData.rightArm, ARM_REST.right, ARM_HOLD_RIGHT, 1);
+            throwerMesh.userData.leftArm.position.copy(ARM_REST.left);
+            throwerMesh.userData.leftArm.position.y = ARM_REST.left.y - armWave * 0.4;
+            resetFeet(throwerMesh);
+        }
         if (introRunning) {
             receiverMesh.userData.leftArm.position.set(
                 ARM_REST.left.x,
@@ -884,7 +1070,6 @@ function placeActors(elapsed, dt = 0) {
             poseArm(receiverMesh.userData.leftArm, ARM_REST.left, ARM_REST.left, 0);
             resetFeet(receiverMesh);
         }
-        resetFeet(throwerMesh);
     } else if (throwing) {
         // Hold through a short whip, then follow through / retract.
         if (flight < 0.05) {
@@ -1043,18 +1228,12 @@ function placeActors(elapsed, dt = 0) {
         meterGoodMax.position.y = range.max * METER_HEIGHT;
     };
     const placeMeterOnGround = () => {
-        // Ground beside thrower, further to their right, matching their yaw.
-        const yaw = throwerMesh.visible
-            ? meterYawScratch.setFromQuaternion(throwerMesh.quaternion, "YXZ").y
-            : 0;
-        meterGroup.rotation.set(0, yaw, 0);
-        // Local -X is anatomical right (lookAt mirrors +X).
-        meterOffset.set(-METER_SIDE, 0, METER_FORWARD);
-        meterOffset.applyAxisAngle(meterUp, yaw);
+        // Fixed screen-right of the thrower — don't orbit with body yaw.
+        meterGroup.rotation.set(0, 0, 0);
         meterGroup.position.set(
-            throwerWorld.x + meterOffset.x,
+            throwerWorld.x + METER_SIDE,
             0.02,
-            throwerWorld.z + meterOffset.z
+            throwerWorld.z + METER_FORWARD
         );
     };
     if (aiming) {
@@ -1228,7 +1407,9 @@ let receiverIntro = 1;
 let meterIntro = 0;
 let meterVisualPower = 0;
 let catchTurn = 0;
+let openTurn = 0;
 let loadIntro = 1;
+let faceCameraIdle = true;
 let receiverFaceYaw = 0;
 let prevGameState = game.state;
 
@@ -1312,6 +1493,24 @@ function frame(now) {
         meterIntro = eased;
         receiverIntro = 1 - eased;
     }
+    if (openTurn > 0) {
+        openTurn = Math.max(0, openTurn - dt * 1.15);
+    }
+    if (idleReturnTurn > 0) {
+        idleReturnTurn = Math.max(0, idleReturnTurn - dt * 1.15);
+    }
+    const readyForPassiveIdle =
+        game.state === "aiming" &&
+        !game.charging &&
+        openTurn <= 0 &&
+        catchTurn <= 0 &&
+        idleReturnTurn <= 0 &&
+        loadIntro <= 0;
+    if (!readyForPassiveIdle || faceCameraIdle) {
+        lastActiveAt = elapsed;
+    } else if (elapsed - lastActiveAt >= PASSIVE_IDLE_DELAY) {
+        beginPassiveCameraIdle();
+    }
     updateMeter();
     placeActors(elapsed, dt);
     updateCamera(dt);
@@ -1393,6 +1592,12 @@ function onPointerDown(event) {
         return;
     }
     if (logic.beginCharge(game)) {
+        markUserActive();
+        if (faceCameraIdle) {
+            faceCameraIdle = false;
+            idleReturnTurn = 0;
+            openTurn = 1;
+        }
         event.preventDefault();
         try {
             canvas.setPointerCapture(event.pointerId);

@@ -57,12 +57,14 @@ assert.strictEqual(aiming.power, 0);
 assert.strictEqual(aiming.charging, false);
 assert.strictEqual(logic.beginCharge(aiming), true);
 assert.strictEqual(aiming.charging, true);
+aiming.powerSpeed = logic.POWER_SPEED;
 logic.update(aiming, 0.1);
 assert.ok(aiming.power > 0);
 assert.ok(aiming.power < 1);
 
 var fullCharge = logic.createGame();
 assert.strictEqual(logic.beginCharge(fullCharge), true);
+fullCharge.powerSpeed = logic.POWER_SPEED;
 step(fullCharge, 1.25);
 assert.strictEqual(fullCharge.state, "throwing");
 assert.ok(fullCharge.lockedPower >= 0.999);
@@ -101,7 +103,34 @@ assert.strictEqual(nextThrow.streak, 2);
 step(nextThrow, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
 assert.strictEqual(nextThrow.state, "aiming");
 assert.strictEqual(nextThrow.thrower.y, logic.THROWER_START.y);
-assert.strictEqual(nextThrow.receiver.y, logic.RECEIVER_START.y);
+assert.ok(nextThrow.varyGoodRange);
+assert.ok(nextThrow.catchRadius > 0);
+assert.ok(nextThrow.receiver.y !== logic.RECEIVER_START.y || nextThrow.catchRadius !== logic.CATCH_RADIUS);
+var variedRange = logic.goodPowerRange(nextThrow);
+assert.ok(variedRange.max - variedRange.min >= logic.GOOD_WIDTH_MIN - 0.001);
+assert.ok(variedRange.max - variedRange.min <= logic.GOOD_WIDTH_MAX + 0.001);
+assert.strictEqual(
+    logic.judgeLanding(nextThrow, logic.landingForPower(nextThrow, (variedRange.min + variedRange.max) / 2)),
+    "caught"
+);
+assert.strictEqual(
+    logic.judgeLanding(nextThrow, logic.landingForPower(nextThrow, Math.max(0, variedRange.min - 0.05))),
+    "short"
+);
+
+var missRetryReceiverY = nextThrow.receiver.y;
+var missRetryRadius = nextThrow.catchRadius;
+assert.strictEqual(logic.beginCharge(nextThrow), true);
+nextThrow.power = 0.05;
+assert.strictEqual(logic.startThrow(nextThrow), true);
+step(nextThrow, logic.THROW_DURATION + 0.001);
+assert.strictEqual(nextThrow.result, "short");
+assert.strictEqual(nextThrow.streak, 0);
+step(nextThrow, logic.RESULT_DURATION + 0.001);
+assert.strictEqual(nextThrow.state, "aiming");
+assert.strictEqual(nextThrow.receiver.y, missRetryReceiverY);
+assert.strictEqual(nextThrow.catchRadius, missRetryRadius);
+assert.ok(nextThrow.varyGoodRange);
 
 var afterCatchShort = throwWithPower(perfect);
 step(afterCatchShort, logic.RESULT_DURATION + logic.AIM_COOLDOWN + 0.02);
@@ -123,5 +152,26 @@ cutGame.throwT = 1;
 var arrived = logic.receiverVisual(cutGame);
 assert.strictEqual(arrived.x, cutGame.receiver.x);
 assert.strictEqual(arrived.y, cutGame.receiver.y);
+
+var earlyStreak = logic.createGame();
+earlyStreak.streak = 1;
+logic.applyCatchWindow(earlyStreak);
+assert.strictEqual(earlyStreak.receiver.y, logic.RECEIVER_START.y);
+assert.strictEqual(earlyStreak.catchRadius, logic.CATCH_RADIUS);
+
+var unlocked = logic.createGame();
+unlocked.varyGoodRange = true;
+logic.applyCatchWindow(unlocked);
+assert.ok(unlocked.catchRadius !== logic.CATCH_RADIUS || unlocked.receiver.y !== logic.RECEIVER_START.y);
+
+var speedSample = logic.createGame();
+assert.strictEqual(logic.beginCharge(speedSample), true);
+assert.strictEqual(speedSample.powerSpeed, logic.FIRST_THROW_POWER_SPEED);
+
+var laterSpeed = logic.createGame();
+laterSpeed.streak = 1;
+assert.strictEqual(logic.beginCharge(laterSpeed), true);
+assert.ok(laterSpeed.powerSpeed >= logic.POWER_SPEED_MIN);
+assert.ok(laterSpeed.powerSpeed <= logic.POWER_SPEED_MAX);
 
 console.log("ultimate-logic tests passed");

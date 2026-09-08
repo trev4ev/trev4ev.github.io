@@ -14,12 +14,35 @@
     var RECEIVER_START = { x: 50, y: 32 };
     var MAX_THROW = 150;
     var CATCH_RADIUS = 14;
+    var GOOD_RANGE_VARY_STREAK = 2;
+    var GOOD_WIDTH_MIN = 0.09;
+    var GOOD_WIDTH_MAX = 0.18;
+    var GOOD_CENTER_MIN = 0.3;
+    var GOOD_CENTER_MAX = 0.78;
     var POWER_SPEED = 0.85;
+    var POWER_SPEED_MIN = 0.7;
+    var POWER_SPEED_MAX = 1.5;
+    var FIRST_THROW_POWER_SPEED = 0.8;
     var THROW_DURATION = 1.8;
-    var RESULT_DURATION = 2.0;
+    // Miss recovery should end when the camera pan finishes (see MISS_PAUSE + MISS_PAN).
+    var RESULT_DURATION = 1.6;
     var AIM_COOLDOWN = 0.4;
     var CUT_SIDE_OFFSET = 38;
     var CUT_DOWNFIELD_OFFSET = 20;
+
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    function samplePowerSpeed(game) {
+        if (!game || game.streak === 0) {
+            return FIRST_THROW_POWER_SPEED;
+        }
+        if (POWER_SPEED_MAX <= POWER_SPEED_MIN) {
+            return POWER_SPEED_MIN;
+        }
+        return POWER_SPEED_MIN + Math.random() * (POWER_SPEED_MAX - POWER_SPEED_MIN);
+    }
 
     function copyPoint(point) {
         return { x: point.x, y: point.y };
@@ -67,12 +90,48 @@
         return Math.abs(game.receiver.y - game.thrower.y);
     }
 
+    function catchRadiusFor(game) {
+        return game.catchRadius != null ? game.catchRadius : CATCH_RADIUS;
+    }
+
     function goodPowerRange(game) {
         var target = targetDistance(game);
+        var radius = catchRadiusFor(game);
         return {
-            min: Math.max(0, (target - CATCH_RADIUS) / MAX_THROW),
-            max: Math.min(1, (target + CATCH_RADIUS) / MAX_THROW)
+            min: Math.max(0, (target - radius) / MAX_THROW),
+            max: Math.min(1, (target + radius) / MAX_THROW)
         };
+    }
+
+    function defaultCatchWindow() {
+        return {
+            receiver: copyPoint(RECEIVER_START),
+            catchRadius: CATCH_RADIUS
+        };
+    }
+
+    function sampleCatchWindow() {
+        var width = GOOD_WIDTH_MIN + Math.random() * (GOOD_WIDTH_MAX - GOOD_WIDTH_MIN);
+        var center = GOOD_CENTER_MIN + Math.random() * (GOOD_CENTER_MAX - GOOD_CENTER_MIN);
+        var half = width / 2;
+        // Keep the window on the meter with room to miss short or long.
+        center = clamp(center, half + 0.04, 1 - half - 0.04);
+        var target = center * MAX_THROW;
+        return {
+            receiver: {
+                x: RECEIVER_START.x,
+                y: THROWER_START.y - target
+            },
+            catchRadius: half * MAX_THROW
+        };
+    }
+
+    function applyCatchWindow(game) {
+        var window = game.varyGoodRange
+            ? sampleCatchWindow()
+            : defaultCatchWindow();
+        game.receiver = window.receiver;
+        game.catchRadius = window.catchRadius;
     }
 
     function landingForPower(game, power) {
@@ -87,7 +146,7 @@
         var dir = throwDirection(game);
         var along = (landing.y - game.thrower.y) * dir;
         var target = targetDistance(game);
-        if (Math.abs(along - target) <= CATCH_RADIUS) {
+        if (Math.abs(along - target) <= catchRadiusFor(game)) {
             return "caught";
         }
         if (along < target) {
@@ -119,6 +178,8 @@
         return {
             state: "aiming",
             power: 0,
+            powerSpeed: POWER_SPEED,
+            catchRadius: CATCH_RADIUS,
             charging: false,
             thrower: copyPoint(THROWER_START),
             receiver: copyPoint(RECEIVER_START),
@@ -133,6 +194,7 @@
             result: null,
             resultT: 0,
             streak: 0,
+            varyGoodRange: false,
             aimCooldown: 0,
             cutSide: 1
         };
@@ -146,7 +208,8 @@
             game.aimCooldown -= dt;
         }
         if (game.charging) {
-            game.power = Math.min(1, game.power + POWER_SPEED * dt);
+            var speed = game.powerSpeed || POWER_SPEED;
+            game.power = Math.min(1, game.power + speed * dt);
             if (game.power >= 1) {
                 startThrow(game);
             }
@@ -159,6 +222,7 @@
         }
         game.charging = true;
         game.power = 0;
+        game.powerSpeed = samplePowerSpeed(game);
         return true;
     }
 
@@ -208,6 +272,9 @@
         game.disc.height = 0;
         if (game.result === "caught") {
             game.streak += 1;
+            if (game.streak >= GOOD_RANGE_VARY_STREAK) {
+                game.varyGoodRange = true;
+            }
             game.disc.x = game.receiver.x;
             game.disc.y = game.receiver.y;
         } else {
@@ -219,7 +286,6 @@
 
     function continueFromCatch(game) {
         game.thrower = copyPoint(THROWER_START);
-        game.receiver = copyPoint(RECEIVER_START);
         game.disc.x = game.thrower.x;
         game.disc.y = game.thrower.y;
         game.disc.height = 0;
@@ -233,23 +299,34 @@
         game.aimCooldown = AIM_COOLDOWN;
         game.cutSide = 1;
         game.state = "aiming";
+        applyCatchWindow(game);
     }
 
     function restart(game) {
-        var next = createGame();
-        game.state = next.state;
+        var savedReceiver = copyPoint(game.receiver);
+        var savedCatchRadius = game.catchRadius;
+        var savedVaryGoodRange = !!game.varyGoodRange;
+        game.state = "aiming";
         game.power = 0;
+        game.powerSpeed = POWER_SPEED;
+        game.catchRadius = savedCatchRadius;
         game.charging = false;
-        game.thrower = next.thrower;
-        game.receiver = next.receiver;
-        game.disc = next.disc;
-        game.lockedPower = next.lockedPower;
-        game.landing = next.landing;
-        game.throwT = next.throwT;
-        game.result = next.result;
-        game.resultT = next.resultT;
+        game.thrower = copyPoint(THROWER_START);
+        game.receiver = savedReceiver;
+        game.disc = {
+            x: THROWER_START.x,
+            y: THROWER_START.y,
+            height: 0
+        };
+        game.lockedPower = null;
+        game.landing = null;
+        game.throwT = 0;
+        game.result = null;
+        game.resultT = 0;
         game.streak = 0;
-        game.aimCooldown = AIM_COOLDOWN;
+        game.varyGoodRange = savedVaryGoodRange;
+        // Miss retry should be immediate once the camera is back.
+        game.aimCooldown = 0;
         game.cutSide = 1;
     }
 
@@ -279,7 +356,15 @@
         RECEIVER_START: RECEIVER_START,
         MAX_THROW: MAX_THROW,
         CATCH_RADIUS: CATCH_RADIUS,
+        GOOD_RANGE_VARY_STREAK: GOOD_RANGE_VARY_STREAK,
+        GOOD_WIDTH_MIN: GOOD_WIDTH_MIN,
+        GOOD_WIDTH_MAX: GOOD_WIDTH_MAX,
+        GOOD_CENTER_MIN: GOOD_CENTER_MIN,
+        GOOD_CENTER_MAX: GOOD_CENTER_MAX,
         POWER_SPEED: POWER_SPEED,
+        POWER_SPEED_MIN: POWER_SPEED_MIN,
+        POWER_SPEED_MAX: POWER_SPEED_MAX,
+        FIRST_THROW_POWER_SPEED: FIRST_THROW_POWER_SPEED,
         THROW_DURATION: THROW_DURATION,
         RESULT_DURATION: RESULT_DURATION,
         AIM_COOLDOWN: AIM_COOLDOWN,
@@ -298,6 +383,8 @@
         continueFromCatch: continueFromCatch,
         restart: restart,
         cutStart: cutStart,
-        receiverVisual: receiverVisual
+        receiverVisual: receiverVisual,
+        samplePowerSpeed: samplePowerSpeed,
+        applyCatchWindow: applyCatchWindow
     };
 });
