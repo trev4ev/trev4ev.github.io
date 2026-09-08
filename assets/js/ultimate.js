@@ -474,6 +474,7 @@ let camSide = CAM_SIDE;
 let lookX = LOOK_X;
 let camBack = 20;
 let camHeight = 6.2;
+let isPortrait = false;
 
 function edgeCylinder(radius, height, color, opacity) {
     const geometry = new THREE.EdgesGeometry(
@@ -1082,11 +1083,13 @@ function placeActors(elapsed, dt = 0) {
         helperLabel.visible = true;
         // Billboard on the first grid line toward the camera, centered on the thrower.
         // Ground grid step is 8; toward camera is +Z from the thrower (dir is downfield).
+        const helperAlong = isPortrait ? 0.28 : 0.5;
         helperLabel.position.set(
             throwerWorld.x + GRID_STEP / 8,
-            0.75,
-            throwerWorld.z + GRID_STEP * -dir / 2
+            isPortrait ? 0.9 : 0.75,
+            throwerWorld.z + GRID_STEP * helperAlong * -dir
         );
+        helperLabel.scale.setScalar(isPortrait ? 0.72 : 1);
         helperLabel.up.set(0, 1, 0);
         helperLabel.lookAt(cameraPos.x, helperLabel.position.y, cameraPos.z);
     } else {
@@ -1204,6 +1207,7 @@ function resize() {
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     const portrait = width / height < 0.78;
+    isPortrait = portrait;
     camSide = portrait ? 0 : CAM_SIDE;
     lookX = portrait ? 0 : LOOK_X;
     camBack = portrait ? 14 : 20;
