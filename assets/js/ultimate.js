@@ -473,8 +473,6 @@ const LOOK_X = 1;
 let camSide = CAM_SIDE;
 let lookX = LOOK_X;
 let camBack = 20;
-let camHeight = 6.2;
-let isPortrait = false;
 
 function edgeCylinder(radius, height, color, opacity) {
     const geometry = new THREE.EdgesGeometry(
@@ -1083,13 +1081,11 @@ function placeActors(elapsed, dt = 0) {
         helperLabel.visible = true;
         // Billboard on the first grid line toward the camera, centered on the thrower.
         // Ground grid step is 8; toward camera is +Z from the thrower (dir is downfield).
-        const helperAlong = isPortrait ? 0.28 : 0.5;
         helperLabel.position.set(
             throwerWorld.x + GRID_STEP / 8,
-            isPortrait ? 0.9 : 0.75,
-            throwerWorld.z + GRID_STEP * helperAlong * -dir
+            0.75,
+            throwerWorld.z + GRID_STEP * -dir / 2
         );
-        helperLabel.scale.setScalar(isPortrait ? 0.72 : 1);
         helperLabel.up.set(0, 1, 0);
         helperLabel.lookAt(cameraPos.x, helperLabel.position.y, cameraPos.z);
     } else {
@@ -1121,7 +1117,7 @@ function placeActors(elapsed, dt = 0) {
     ground.position.z = anchor.z;
 
     const back = -dir * camBack;
-    resetCam.set(throwerWorld.x + camSide, camHeight, throwerWorld.z + back);
+    resetCam.set(throwerWorld.x + camSide, 6.2, throwerWorld.z + back);
     // Same thrower framing for miss pan-end and aiming so the handoff doesn't dip.
     placeDiscInRightHand(throwerMesh, handScratch);
     resetLook.copy(handScratch);
@@ -1130,14 +1126,14 @@ function placeActors(elapsed, dt = 0) {
     resetLook.z = THREE.MathUtils.lerp(handScratch.z, receiverWorld.z, 0.22);
 
     if (caught) {
-        desiredCam.set(receiverWorld.x + camSide, camHeight, receiverWorld.z + back);
+        desiredCam.set(receiverWorld.x + camSide, 6.2, receiverWorld.z + back);
         desiredLook.set(receiverWorld.x + lookX, 1.4, receiverWorld.z + dir * 12);
     } else if (throwing) {
         const follow = 0.2 + Math.min(1, game.throwT) * 0.55;
         interest.copy(throwerWorld).lerp(discWorld, follow);
         desiredCam.set(
             throwerWorld.x + camSide,
-            camHeight + game.disc.height * 3.2,
+            6.2 + game.disc.height * 3.2,
             interest.z + back
         );
         desiredLook.copy(discWorld);
@@ -1157,7 +1153,7 @@ function placeActors(elapsed, dt = 0) {
             const settleZ = THREE.MathUtils.lerp(landingWorld.z, receiverWorld.z, reach);
             desiredCam.set(
                 throwerWorld.x + camSide * (1 - eased) + (settleX + camSide) * eased,
-                camHeight + game.disc.height * 3.2 * (1 - eased),
+                6.2 + game.disc.height * 3.2 * (1 - eased),
                 (interest.z + back) * (1 - eased) + (settleZ + back) * eased
             );
             desiredLook.set(
@@ -1207,12 +1203,10 @@ function resize() {
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     const portrait = width / height < 0.78;
-    isPortrait = portrait;
-    camSide = portrait ? 0 : CAM_SIDE;
-    lookX = portrait ? 0 : LOOK_X;
-    camBack = portrait ? 14 : 20;
-    camHeight = portrait ? 5.2 : 6.2;
-    camera.fov = portrait ? 36 : 42;
+    camSide = portrait ? 1.3 : CAM_SIDE;
+    lookX = portrait ? 1.3 : LOOK_X;
+    camBack = portrait ? 17 : 20;
+    camera.fov = portrait ? 40 : 42;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
