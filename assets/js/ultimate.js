@@ -826,6 +826,60 @@ function clearLeaderboardPlayer() {
     scoreboardDirty = true;
 }
 
+function buildOptimisticLeaderboard(score, playerName) {
+    const optimisticId = "optimistic-local";
+    const others = (leaderboardTop || []).map(function (row) {
+        return {
+            id: row.id,
+            playerName: row.playerName,
+            score: row.score,
+            isPlayer: false
+        };
+    });
+    const self = {
+        id: optimisticId,
+        playerName: playerName,
+        score: score,
+        isPlayer: true
+    };
+    const sorted = others.concat([self]).sort(function (a, b) {
+        if (b.score !== a.score) {
+            return b.score - a.score;
+        }
+        // Existing rows keep precedence over the new optimistic entry on ties.
+        if (a.id === optimisticId) {
+            return 1;
+        }
+        if (b.id === optimisticId) {
+            return -1;
+        }
+        return 0;
+    });
+    const rank = sorted.findIndex(function (row) {
+        return row.id === optimisticId;
+    }) + 1;
+    const inTop3 = rank > 0 && rank <= 3;
+    const top3 = sorted.slice(0, 3).map(function (row, index) {
+        return {
+            rank: index + 1,
+            id: row.id,
+            playerName: row.playerName,
+            score: row.score,
+            isPlayer: !!row.isPlayer
+        };
+    });
+    return {
+        top3: top3,
+        player: {
+            id: optimisticId,
+            playerName: playerName,
+            score: score,
+            rank: rank,
+            inTop3: inTop3
+        }
+    };
+}
+
 function showNameError(message) {
     if (!nameError) {
         return;
@@ -886,6 +940,8 @@ async function handleFinishedRun(score) {
     }
     scoreSubmitInFlight = true;
     pendingScore = score;
+    const previousTop = leaderboardTop.slice();
+    const previousPlayer = leaderboardPlayer;
     try {
         let attempts = 0;
         while (attempts < 3) {
@@ -897,6 +953,10 @@ async function handleFinishedRun(score) {
                 }
                 return;
             }
+            const optimistic = buildOptimisticLeaderboard(score, playerName);
+            setLeaderboard(optimistic.top3, optimistic.player, {
+                armClearOnNextThrow: true
+            });
             try {
                 const result = await scoresApi.submitScore(score, playerName);
                 if (result && result.top3) {
@@ -911,6 +971,9 @@ async function handleFinishedRun(score) {
                 const message = (err && err.message) || "Could not save score";
                 const needsNewName =
                     /name|different|characters|letters/i.test(message);
+                // Roll back the optimistic board until we have a good name / answer.
+                setLeaderboard(previousTop, previousPlayer, null);
+                clearPlayerAfterNextThrow = false;
                 if (needsNewName) {
                     try {
                         window.localStorage.removeItem(scoresApi.NAME_KEY);
