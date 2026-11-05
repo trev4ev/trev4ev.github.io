@@ -702,12 +702,29 @@ function makeScoreboard() {
 
 const scoreboard = makeScoreboard();
 
-function truncateName(name, maxChars) {
+function fitNameToWidth(ctx, name, maxWidth) {
     const value = String(name || "");
-    if (value.length <= maxChars) {
+    if (!value || maxWidth <= 0) {
+        return "";
+    }
+    if (ctx.measureText(value).width <= maxWidth) {
         return value;
     }
-    return value.slice(0, Math.max(1, maxChars - 1)) + "…";
+    const ellipsis = "…";
+    let low = 0;
+    let high = value.length;
+    let best = ellipsis;
+    while (low <= high) {
+        const mid = (low + high) >> 1;
+        const candidate = value.slice(0, mid) + ellipsis;
+        if (ctx.measureText(candidate).width <= maxWidth) {
+            best = candidate;
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return best;
 }
 
 function paintScoreboard() {
@@ -738,7 +755,8 @@ function paintScoreboard() {
 
     const padX = 70;
     const scoreX = width - 70;
-    const nameX = 200;
+    const nameGap = 28;
+    const scoreGap = 28;
     const showPlayer = !!(leaderboardPlayer && !leaderboardPlayer.inTop3);
     const rowCount = showPlayer ? 4 : 3;
     const titleY = 118;
@@ -762,13 +780,19 @@ function paintScoreboard() {
         ctx.textAlign = "left";
         ctx.font = "800 68px Nunito, Noto Sans, sans-serif";
         ctx.fillText(rankLabel, padX, y);
+        const rankWidth = ctx.measureText(rankLabel).width;
+        const nameX = padX + rankWidth + nameGap;
         if (name) {
+            const scoreText = String(score);
+            ctx.font = "800 68px Nunito, Noto Sans, sans-serif";
+            const scoreWidth = ctx.measureText(scoreText).width;
+            const nameMaxWidth = Math.max(0, scoreX - scoreWidth - scoreGap - nameX);
             ctx.font = "700 64px Nunito, Noto Sans, sans-serif";
-            ctx.fillText(truncateName(name, 9), nameX, y);
+            ctx.fillText(fitNameToWidth(ctx, name, nameMaxWidth), nameX, y);
             ctx.textAlign = "right";
             ctx.fillStyle = "#6b7fc4";
             ctx.font = "800 68px Nunito, Noto Sans, sans-serif";
-            ctx.fillText(String(score), scoreX, y);
+            ctx.fillText(scoreText, scoreX, y);
             ctx.textAlign = "left";
         } else {
             ctx.font = "700 64px Nunito, Noto Sans, sans-serif";
