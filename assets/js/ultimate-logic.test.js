@@ -23,16 +23,19 @@ var shortGame = throwWithPower(0.15);
 assert.strictEqual(shortGame.result, "short");
 assert.strictEqual(shortGame.state, "result");
 assert.strictEqual(shortGame.streak, 0);
+assert.strictEqual(shortGame.lastScore, 0);
 
 var longGame = throwWithPower(0.95);
 assert.strictEqual(longGame.result, "long");
 assert.strictEqual(longGame.streak, 0);
+assert.strictEqual(longGame.lastScore, 0);
 
 var range = logic.goodPowerRange(logic.createGame());
 var perfect = (range.min + range.max) / 2;
 var caughtGame = throwWithPower(perfect);
 assert.strictEqual(caughtGame.result, "caught");
 assert.strictEqual(caughtGame.streak, 1);
+assert.strictEqual(caughtGame.lastScore, 1);
 assert.strictEqual(caughtGame.disc.x, caughtGame.receiver.x);
 assert.strictEqual(caughtGame.disc.y, caughtGame.receiver.y);
 
@@ -126,6 +129,7 @@ assert.strictEqual(logic.startThrow(nextThrow), true);
 step(nextThrow, logic.THROW_DURATION + 0.001);
 assert.strictEqual(nextThrow.result, "short");
 assert.strictEqual(nextThrow.streak, 0);
+assert.strictEqual(nextThrow.lastScore, 2);
 step(nextThrow, logic.RESULT_DURATION + 0.001);
 assert.strictEqual(nextThrow.state, "aiming");
 assert.strictEqual(nextThrow.receiver.y, missRetryReceiverY);

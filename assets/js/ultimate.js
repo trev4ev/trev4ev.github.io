@@ -4,8 +4,57 @@ import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 
 const logic = window.UltimateLogic;
+const scoresApi = window.UltimateScores;
 const canvas = document.getElementById("ultimate-field");
 const root = document.getElementById("ultimate");
+const nameModal = document.getElementById("score-name-modal");
+const nameForm = document.getElementById("score-name-form");
+const nameInput = document.getElementById("score-name-input");
+const nameError = document.getElementById("score-name-error");
+const nameSummary = document.getElementById("score-name-summary");
+const nameRandomBtn = document.getElementById("score-name-random");
+const nameCloseBtn = document.getElementById("score-name-close");
+
+const NAME_ADJECTIVES = [
+    "Swift",
+    "Bold",
+    "Clever",
+    "Brave",
+    "Happy",
+    "Lucky",
+    "Quiet",
+    "Wild",
+    "Cosmic",
+    "Tiny"
+];
+const NAME_ANIMALS = [
+    "Fox",
+    "Bear",
+    "Wolf",
+    "Cat",
+    "Owl",
+    "Elk",
+    "Hawk",
+    "Seal",
+    "Puma",
+    "Crow"
+];
+
+function randomBoardName() {
+    const adjective =
+        NAME_ADJECTIVES[Math.floor(Math.random() * NAME_ADJECTIVES.length)];
+    const animal = NAME_ANIMALS[Math.floor(Math.random() * NAME_ANIMALS.length)];
+    return adjective + " " + animal;
+}
+
+function setNameSummary(score) {
+    if (!nameSummary) {
+        return;
+    }
+    const n = Math.max(0, score | 0);
+    nameSummary.textContent =
+        "You scored " + n + (n === 1 ? " throw!" : " throws!");
+}
 
 if (!canvas || !logic) {
     throw new Error("Ultimate game failed to initialize");
@@ -473,12 +522,17 @@ const METER_FORWARD = 0.2;
 const METER_MARK_RADIUS = 0.185;
 const METER_MARK_THICK = 0.05;
 const METER_SEGMENTS = 28;
+const SCOREBOARD_SIDE = 4.85;
+const SCOREBOARD_WIDTH = 2.55;
+const SCOREBOARD_HEIGHT = 2.05;
+const SCOREBOARD_MOBILE_BASE_Y = 2.85;
 const GRID_STEP = 200 / 25;
 const CAM_SIDE = 1;
 const LOOK_X = 1;
 let camSide = CAM_SIDE;
 let lookX = LOOK_X;
 let camBack = 20;
+let isPortrait = false;
 
 function edgeCylinder(radius, height, color, opacity) {
     const geometry = new THREE.EdgesGeometry(
@@ -609,6 +663,324 @@ let streakAnim = 0;
 const streakMat = noOutline(
     glossy(0xa892de, { emissive: 0x8f74d0, emissiveIntensity: 0.28 })
 );
+
+let leaderboardTop = [];
+let leaderboardPlayer = null;
+let clearPlayerAfterNextThrow = false;
+let scoreboardDirty = true;
+let scoreSubmitInFlight = false;
+let pendingScore = null;
+let namePromptResolver = null;
+
+function makeScoreboard() {
+    const width = 1024;
+    const height = 820;
+    const boardCanvas = document.createElement("canvas");
+    boardCanvas.width = width;
+    boardCanvas.height = height;
+    const texture = new THREE.CanvasTexture(boardCanvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.premultiplyAlpha = true;
+    const material = noOutline(
+        new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide
+        })
+    );
+    const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(SCOREBOARD_WIDTH, SCOREBOARD_HEIGHT),
+        material
+    );
+    mesh.userData.canvas = boardCanvas;
+    mesh.userData.texture = texture;
+    mesh.visible = false;
+    scene.add(mesh);
+    return mesh;
+}
+
+const scoreboard = makeScoreboard();
+
+function truncateName(name, maxChars) {
+    const value = String(name || "");
+    if (value.length <= maxChars) {
+        return value;
+    }
+    return value.slice(0, Math.max(1, maxChars - 1)) + "…";
+}
+
+function paintScoreboard() {
+    const boardCanvas = scoreboard.userData.canvas;
+    const ctx = boardCanvas.getContext("2d");
+    const width = boardCanvas.width;
+    const height = boardCanvas.height;
+    ctx.clearRect(0, 0, width, height);
+
+    // Soft sign plate
+    const radius = 48;
+    ctx.fillStyle = "rgba(247, 245, 255, 0.92)";
+    ctx.strokeStyle = "rgba(138, 116, 184, 0.55)";
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(radius, 36);
+    ctx.lineTo(width - radius, 36);
+    ctx.quadraticCurveTo(width - 24, 36, width - 24, 36 + radius);
+    ctx.lineTo(width - 24, height - 36 - radius);
+    ctx.quadraticCurveTo(width - 24, height - 36, width - radius, height - 36);
+    ctx.lineTo(radius, height - 36);
+    ctx.quadraticCurveTo(24, height - 36, 24, height - 36 - radius);
+    ctx.lineTo(24, 36 + radius);
+    ctx.quadraticCurveTo(24, 36, radius, 36);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    const padX = 70;
+    const scoreX = width - 70;
+    const nameX = 200;
+    const showPlayer = !!(leaderboardPlayer && !leaderboardPlayer.inTop3);
+    const rowCount = showPlayer ? 4 : 3;
+    const titleY = 118;
+    const rowsTop = 190;
+    const rowsBottom = height - 56;
+    const rowH = (rowsBottom - rowsTop) / rowCount;
+
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#4a3a68";
+    ctx.font = "800 78px Nunito, Noto Sans, sans-serif";
+    ctx.fillText("Leaderboard", padX, titleY);
+
+    function drawRow(y, rankLabel, name, score, highlight) {
+        const band = Math.min(110, rowH * 0.78);
+        if (highlight) {
+            ctx.fillStyle = "rgba(168, 184, 236, 0.45)";
+            ctx.fillRect(48, y - band / 2, width - 96, band);
+        }
+        ctx.fillStyle = highlight ? "#3d3058" : "#5a4a78";
+        ctx.textAlign = "left";
+        ctx.font = "800 68px Nunito, Noto Sans, sans-serif";
+        ctx.fillText(rankLabel, padX, y);
+        if (name) {
+            ctx.font = "700 64px Nunito, Noto Sans, sans-serif";
+            ctx.fillText(truncateName(name, 9), nameX, y);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#6b7fc4";
+            ctx.font = "800 68px Nunito, Noto Sans, sans-serif";
+            ctx.fillText(String(score), scoreX, y);
+            ctx.textAlign = "left";
+        } else {
+            ctx.font = "700 64px Nunito, Noto Sans, sans-serif";
+            ctx.fillStyle = "#9aa0d8";
+            ctx.fillText("—", nameX, y);
+        }
+    }
+
+    const rows = leaderboardTop.slice(0, 3);
+    for (let i = 0; i < 3; i++) {
+        const y = rowsTop + rowH * (i + 0.5);
+        const row = rows[i];
+        drawRow(
+            y,
+            String(i + 1) + ".",
+            row ? row.playerName : null,
+            row ? row.score : null,
+            !!(row && row.isPlayer)
+        );
+    }
+
+    if (showPlayer) {
+        const y = rowsTop + rowH * 3.5;
+        drawRow(
+            y,
+            "#" + leaderboardPlayer.rank,
+            leaderboardPlayer.playerName,
+            leaderboardPlayer.score,
+            true
+        );
+    }
+
+    scoreboard.userData.texture.needsUpdate = true;
+    scoreboardDirty = false;
+}
+
+function setLeaderboard(top3, player, options) {
+    leaderboardTop = top3 || [];
+    leaderboardPlayer = player || null;
+    if (options && options.armClearOnNextThrow && leaderboardPlayer) {
+        clearPlayerAfterNextThrow = true;
+    }
+    scoreboardDirty = true;
+}
+
+function clearLeaderboardPlayer() {
+    if (!leaderboardPlayer && !clearPlayerAfterNextThrow) {
+        return;
+    }
+    leaderboardPlayer = null;
+    clearPlayerAfterNextThrow = false;
+    leaderboardTop = leaderboardTop.map(function (row) {
+        return Object.assign({}, row, { isPlayer: false });
+    });
+    scoreboardDirty = true;
+}
+
+function showNameError(message) {
+    if (!nameError) {
+        return;
+    }
+    if (!message) {
+        nameError.hidden = true;
+        nameError.textContent = "";
+        return;
+    }
+    nameError.hidden = false;
+    nameError.textContent = message;
+}
+
+function promptForName(score) {
+    if (!nameModal || !nameForm || !nameInput) {
+        return Promise.resolve(scoresApi ? scoresApi.getStoredName() : "");
+    }
+    const existing = scoresApi ? scoresApi.getStoredName() : "";
+    if (existing) {
+        return Promise.resolve(existing);
+    }
+    return new Promise(function (resolve) {
+        namePromptResolver = resolve;
+        showNameError("");
+        setNameSummary(score);
+        nameInput.value = "";
+        nameModal.hidden = false;
+        window.setTimeout(function () {
+            nameInput.focus();
+            nameInput.select();
+        }, 30);
+    });
+}
+
+function closeNameModal(name) {
+    if (nameModal) {
+        nameModal.hidden = true;
+    }
+    showNameError("");
+    const resolver = namePromptResolver;
+    namePromptResolver = null;
+    if (resolver) {
+        resolver(name || "");
+    }
+}
+
+async function refreshTopScores() {
+    if (!scoresApi) {
+        return;
+    }
+    const top3 = await scoresApi.fetchTopScores();
+    setLeaderboard(top3, leaderboardPlayer, null);
+}
+
+async function handleFinishedRun(score) {
+    if (!scoresApi || scoreSubmitInFlight || score < 1) {
+        return;
+    }
+    scoreSubmitInFlight = true;
+    pendingScore = score;
+    try {
+        let attempts = 0;
+        while (attempts < 3) {
+            attempts += 1;
+            const playerName = await promptForName(score);
+            if (!playerName) {
+                if (scoresApi) {
+                    scoresApi.clearRun();
+                }
+                return;
+            }
+            try {
+                const result = await scoresApi.submitScore(score, playerName);
+                if (result && result.top3) {
+                    setLeaderboard(result.top3, result.player || null, {
+                        armClearOnNextThrow: true
+                    });
+                } else {
+                    await refreshTopScores();
+                }
+                return;
+            } catch (err) {
+                const message = (err && err.message) || "Could not save score";
+                const needsNewName =
+                    /name|different|characters|letters/i.test(message);
+                if (needsNewName) {
+                    try {
+                        window.localStorage.removeItem(scoresApi.NAME_KEY);
+                    } catch (storageErr) {
+                        // Ignore.
+                    }
+                    if (nameModal && nameInput) {
+                        setNameSummary(score);
+                        nameModal.hidden = false;
+                        showNameError(message);
+                        nameInput.focus();
+                        // Re-enter promptForName wait loop.
+                        await new Promise(function (resolve) {
+                            namePromptResolver = resolve;
+                        });
+                        continue;
+                    }
+                }
+                console.warn("ultimate score submit failed", err);
+                await refreshTopScores();
+                return;
+            }
+        }
+    } finally {
+        pendingScore = null;
+        scoreSubmitInFlight = false;
+    }
+}
+
+if (nameRandomBtn && nameInput) {
+    nameRandomBtn.addEventListener("click", function () {
+        nameInput.value = randomBoardName();
+        showNameError("");
+        nameInput.focus();
+        nameInput.select();
+    });
+}
+
+if (nameCloseBtn) {
+    nameCloseBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeNameModal("");
+    });
+}
+
+if (nameForm) {
+    nameForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const value = (nameInput && nameInput.value ? nameInput.value : "").trim();
+        if (!value) {
+            showNameError("Enter a name to continue");
+            return;
+        }
+        if (scoresApi && value.length > scoresApi.MAX_NAME_LEN) {
+            showNameError("Keep it to " + scoresApi.MAX_NAME_LEN + " characters");
+            return;
+        }
+        if (!/^[A-Za-z0-9][A-Za-z0-9 _\-']*$/.test(value)) {
+            showNameError("Letters, numbers, spaces, - _ ' only");
+            return;
+        }
+        if (scoresApi) {
+            scoresApi.setStoredName(value);
+        }
+        closeNameModal(value);
+    });
+}
+
+refreshTopScores();
 
 function clearStreakMesh() {
     if (!streakMesh) {
@@ -1252,6 +1624,46 @@ function placeActors(elapsed, dt = 0) {
         meterGroup.visible = false;
     }
 
+    if (scoreboardDirty) {
+        paintScoreboard();
+    }
+    // Only beside the opening throw of a run — hide once a streak starts.
+    const showScoreboard =
+        throwerMesh.visible &&
+        game.streak === 0 &&
+        (aiming || throwing || miss) &&
+        loadIntro < 0.85;
+    if (showScoreboard) {
+        const grow = aiming
+            ? meterIntro * meterIntro * (3 - 2 * meterIntro)
+            : 1;
+        const boardGrow = Math.max(0.001, grow);
+        scoreboard.visible = true;
+        if (isPortrait) {
+            // Mobile: float the board above the thrower so it stays on-screen.
+            scoreboard.position.set(
+                throwerWorld.x,
+                SCOREBOARD_MOBILE_BASE_Y + SCOREBOARD_HEIGHT * 0.5 * boardGrow,
+                throwerWorld.z
+            );
+        } else {
+            scoreboard.position.set(
+                throwerWorld.x + SCOREBOARD_SIDE,
+                0.2 + SCOREBOARD_HEIGHT * 0.5 * boardGrow,
+                throwerWorld.z + METER_FORWARD
+            );
+        }
+        scoreboard.scale.set(1, boardGrow, 1);
+        scoreboard.up.set(0, 1, 0);
+        scoreboard.lookAt(cameraPos.x, scoreboard.position.y, cameraPos.z);
+        scoreboard.material.opacity =
+            loadIntro > 0
+                ? Math.max(0, (1 - loadIntro) * (1 - loadIntro) * (3 - 2 * (1 - loadIntro)))
+                : 1;
+    } else {
+        scoreboard.visible = false;
+    }
+
     // Helper until the first successful catch — stays through throws and misses.
     if (caught) {
         showFirstThrowHelper = false;
@@ -1382,6 +1794,7 @@ function resize() {
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
     const portrait = width / height < 0.78;
+    isPortrait = portrait;
     camSide = portrait ? 1.3 : CAM_SIDE;
     lookX = portrait ? 1.3 : LOOK_X;
     camBack = portrait ? 17 : 20;
@@ -1466,6 +1879,14 @@ function frame(now) {
         game.state === "result" &&
         game.result === "caught"
     ) {
+        if (clearPlayerAfterNextThrow) {
+            clearLeaderboardPlayer();
+        }
+        if (scoresApi && game.streak === 1) {
+            Promise.resolve(scoresApi.ensureRun()).catch(function (err) {
+                console.warn("ultimate start-run failed", err);
+            });
+        }
         // Start the next throw setup immediately so the turn, meter, and
         // new receiver intro all run together.
         logic.continueFromCatch(game);
@@ -1477,6 +1898,16 @@ function frame(now) {
     ) {
         missHoldCam.copy(cameraPos);
         missHoldLook.copy(cameraLook);
+        if (clearPlayerAfterNextThrow) {
+            clearLeaderboardPlayer();
+        }
+        if (game.lastScore > 0) {
+            handleFinishedRun(game.lastScore).catch(function (err) {
+                console.warn("ultimate score submit failed", err);
+            });
+        } else if (scoresApi) {
+            scoresApi.clearRun();
+        }
     }
     prevGameState = game.state;
     if (loadIntro > 0) {
@@ -1583,6 +2014,9 @@ function isThrowControlHit(clientX, clientY) {
 
 function onPointerDown(event) {
     if (event.target.closest && event.target.closest("a")) {
+        return;
+    }
+    if (nameModal && !nameModal.hidden) {
         return;
     }
     if (catchTurn > 0 || loadIntro > 0) {

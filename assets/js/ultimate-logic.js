@@ -194,6 +194,7 @@
             result: null,
             resultT: 0,
             streak: 0,
+            lastScore: 0,
             varyGoodRange: false,
             aimCooldown: 0,
             cutSide: 1
@@ -272,12 +273,15 @@
         game.disc.height = 0;
         if (game.result === "caught") {
             game.streak += 1;
+            game.lastScore = game.streak;
             if (game.streak >= GOOD_RANGE_VARY_STREAK) {
                 game.varyGoodRange = true;
             }
             game.disc.x = game.receiver.x;
             game.disc.y = game.receiver.y;
         } else {
+            // Preserve the completed run's score before resetting the live streak.
+            game.lastScore = game.streak;
             game.streak = 0;
             game.disc.x = game.landing.x;
             game.disc.y = game.landing.y;
@@ -324,6 +328,7 @@
         game.result = null;
         game.resultT = 0;
         game.streak = 0;
+        // lastScore is kept so the UI can show the finished run.
         game.varyGoodRange = savedVaryGoodRange;
         // Miss retry should be immediate once the camera is back.
         game.aimCooldown = 0;
